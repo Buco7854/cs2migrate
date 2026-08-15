@@ -1,4 +1,6 @@
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 using Microsoft.Win32;
 
@@ -6,14 +8,24 @@ namespace CS2Migrate.App;
 
 /// <summary>
 /// Keeps the window in step with the Windows personalisation settings: the app follows the
-/// system light/dark preference and paints with the accent colour the user picked.
+/// system light/dark preference, paints with the accent colour the user picked, and asks DWM
+/// for a matching title bar.
 /// </summary>
 internal static class ThemeService
 {
     private const string PersonalizeKey = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
 
+    // DWMWA_USE_IMMERSIVE_DARK_MODE. The attribute moved from 19 to 20 in Windows 10 20H1.
+    private const int UseImmersiveDarkMode = 20;
+    private const int UseImmersiveDarkModeBefore20H1 = 19;
+
     private static readonly Uri LightTheme = new("Resources/Theme.Light.xaml", UriKind.Relative);
     private static readonly Uri DarkTheme = new("Resources/Theme.Dark.xaml", UriKind.Relative);
+
+    private static bool _isLight = true;
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr window, int attribute, ref int value, int size);
 
     public static void Initialize()
     {
@@ -21,11 +33,51 @@ internal static class ThemeService
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
     }
 
+    /// <summary>
+    /// Without this the app paints itself dark while Windows keeps drawing a light title bar.
+    /// </summary>
+    public static void RegisterWindow(Window window)
+    {
+        if (new WindowInteropHelper(window).Handle != IntPtr.Zero)
+        {
+            ApplyTitleBar(window);
+            return;
+        }
+
+        window.SourceInitialized += (sender, _) =>
+        {
+            if (sender is Window initialized)
+            {
+                ApplyTitleBar(initialized);
+            }
+        };
+    }
+
     public static void Apply()
     {
-        var light = UsesLightTheme();
-        SwapThemeDictionary(light ? LightTheme : DarkTheme, light ? DarkTheme : LightTheme);
-        ApplyAccent(light);
+        _isLight = UsesLightTheme();
+        SwapThemeDictionary(_isLight ? LightTheme : DarkTheme, _isLight ? DarkTheme : LightTheme);
+        ApplyAccent(_isLight);
+
+        foreach (Window window in Application.Current.Windows)
+        {
+            ApplyTitleBar(window);
+        }
+    }
+
+    private static void ApplyTitleBar(Window window)
+    {
+        var handle = new WindowInteropHelper(window).Handle;
+        if (handle == IntPtr.Zero)
+        {
+            return;
+        }
+
+        var useDarkTitleBar = _isLight ? 0 : 1;
+        if (DwmSetWindowAttribute(handle, UseImmersiveDarkMode, ref useDarkTitleBar, sizeof(int)) != 0)
+        {
+            _ = DwmSetWindowAttribute(handle, UseImmersiveDarkModeBefore20H1, ref useDarkTitleBar, sizeof(int));
+        }
     }
 
     private static void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)

@@ -3,6 +3,7 @@ const translations = {
     pageTitle: "CS2 Migrate — copy CS2 settings between Steam accounts",
     pageDescription: "A single Windows executable that copies Counter-Strike 2 settings between the Steam accounts on your PC, with backups and verification.",
     languageLabel: "Passer en français",
+    themeLabel: "Switch between the light and dark theme",
     skip: "Skip to content",
 
     navWhat: "What it copies",
@@ -102,6 +103,7 @@ const translations = {
     pageTitle: "CS2 Migrate — copier ses réglages CS2 entre comptes Steam",
     pageDescription: "Un seul exécutable Windows qui copie les réglages Counter-Strike 2 entre les comptes Steam de votre PC, avec sauvegarde et vérification.",
     languageLabel: "Switch to English",
+    themeLabel: "Basculer entre le thème clair et le thème sombre",
     skip: "Aller au contenu",
 
     navWhat: "Ce qui est copié",
@@ -254,10 +256,17 @@ const applyLanguage = () => {
   const toggle = document.querySelector("#language-toggle");
   toggle.textContent = language === "en" ? "FR" : "EN";
   toggle.setAttribute("aria-label", text.languageLabel);
+  document.querySelector("#theme-toggle").setAttribute("aria-label", text.themeLabel);
 
   if (!buildInfo) document.querySelector("#checksum").textContent = text.checksumPending;
   renderBuild();
 };
+
+document.querySelector("#theme-toggle").addEventListener("click", () => {
+  const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem("cs2migrate-theme", theme); } catch { /* Keep the session theme. */ }
+});
 
 document.querySelector("#language-toggle").addEventListener("click", () => {
   language = language === "en" ? "fr" : "en";

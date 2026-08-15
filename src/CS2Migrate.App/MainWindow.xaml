@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:CS2Migrate.App"
-        Title="{DynamicResource AppTitle}" Width="1060" Height="820" MinWidth="900" MinHeight="700"
+        Title="{DynamicResource AppTitle}" Width="1060" Height="820" MinWidth="900" MinHeight="640"
         WindowStartupLocation="CenterScreen" Loaded="Window_Loaded" Activated="Window_Activated">
     <Window.Resources>
 
@@ -150,7 +150,9 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="{DynamicResource AppTitle}" FontSize="18" FontWeight="SemiBold"
+                    <!-- Literal: the product name is not translated, and routing it through a
+                         resource lookup left the line blank. -->
+                    <TextBlock Text="CS2 Migrate" FontSize="18" FontWeight="SemiBold"
                                FontFamily="Segoe UI" Foreground="{DynamicResource TextPrimaryBrush}" />
                     <TextBlock Text="{DynamicResource Slogan}" FontSize="12" FontFamily="Segoe UI"
                                Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,1,0,0" />
@@ -202,14 +204,16 @@
         </Grid>
 
         <!-- ============ Content ============
-             Fixed sections with the file list taking the slack, so the window never
-             opens with a band of empty space at the bottom. -->
-        <Grid Grid.Row="1" Margin="28,6,28,20" MaxWidth="1120">
+             Cards keep their natural height and the page scrolls when it has to, the way a
+             Windows settings page behaves. Stretching the last card to fill a maximised
+             window just produced a large empty panel. -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="28,6,28,20" MaxWidth="1120">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" MinHeight="180" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Safety info bar -->
@@ -358,7 +362,7 @@
                         </Border>
                     </Grid>
 
-                    <Grid Grid.Row="1" Margin="0,10,0,6">
+                    <Grid Grid.Row="1" Margin="0,10,0,6" MinHeight="84" MaxHeight="260">
                         <ListBox ItemsSource="{Binding PreviewFiles}" ItemTemplate="{StaticResource PreviewFileTemplate}"
                                  Margin="-8,0,-8,0" />
                         <TextBlock Text="{DynamicResource PreviewEmpty}" HorizontalAlignment="Center"
@@ -382,6 +386,7 @@
                 </Grid>
             </Border>
         </Grid>
+        </ScrollViewer>
 
         <!-- ============ Command bar ============ -->
         <Border Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}"

@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = _viewModel;
+        ThemeService.RegisterWindow(this);
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)

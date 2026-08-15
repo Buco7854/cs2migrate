@@ -16,6 +16,15 @@
   <title>CS2 Migrate — copy CS2 settings between Steam accounts</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    // Runs before the first paint so the page never flashes the wrong theme.
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem("cs2migrate-theme"); } catch (error) { /* storage may be off */ }
+      var dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    })();
+  </script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -35,6 +44,10 @@
       </nav>
       <div class="topbar-actions">
         <a class="ghost-button" href="https://github.com/Buco7854/cs2migrate">GitHub</a>
+        <button class="ghost-button icon-button" id="theme-toggle" type="button" aria-label="Switch theme">
+          <svg viewBox="0 0 20 20" aria-hidden="true" class="icon-moon"><path d="M16 12.2A7 7 0 0 1 7.8 4a7 7 0 1 0 8.2 8.2Z"/></svg>
+          <svg viewBox="0 0 20 20" aria-hidden="true" class="icon-sun"><circle cx="10" cy="10" r="3.6"/><path d="M10 2.2v1.6M10 16.2v1.6M17.8 10h-1.6M3.8 10H2.2M15.5 4.5l-1.1 1.1M5.6 14.4l-1.1 1.1M15.5 15.5l-1.1-1.1M5.6 5.6 4.5 4.5"/></svg>
+        </button>
         <button class="ghost-button" id="language-toggle" type="button" aria-label="Passer en français">FR</button>
       </div>
     </div>

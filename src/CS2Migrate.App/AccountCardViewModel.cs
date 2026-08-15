@@ -17,9 +17,9 @@ internal sealed class AccountCardViewModel(SteamAccount account)
         1 => LanguageService.Text("OnePortableFile"),
         _ => LanguageService.Format("ManyPortableFiles", Account.PortableFileCount)
     };
-    public Brush HealthBrush => Account.PortableFileCount > 0
-        ? new SolidColorBrush(Color.FromRgb(52, 214, 199))
-        : new SolidColorBrush(Color.FromRgb(245, 170, 66));
+    public StatusSeverity HealthSeverity => Account.PortableFileCount > 0
+        ? StatusSeverity.Success
+        : StatusSeverity.Caution;
     public ImageSource Avatar { get; } = AvatarFactory.Create(account);
     public string LastUsed => Account.LastLogin is null
         ? LanguageService.Text("LastUsedUnknown")

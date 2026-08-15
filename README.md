@@ -1,13 +1,12 @@
 <div align="center">
   <img src="docs/favicon.svg" width="82" alt="CS2 Migrate logo">
   <h1>CS2 Migrate</h1>
-  <p><strong>Move your setup. Keep your edge.</strong></p>
-  <p>Safe, visual CS2 settings migration for local Steam accounts.</p>
+  <p><strong>Copy Counter-Strike 2 settings between the Steam accounts on your PC.</strong></p>
   <p>
     <a href="https://github.com/Buco7854/cs2migrate/actions/workflows/build-and-pages.yml"><img alt="Build" src="https://github.com/Buco7854/cs2migrate/actions/workflows/build-and-pages.yml/badge.svg?branch=main"></a>
-    <img alt="Windows" src="https://img.shields.io/badge/Windows-10%20%7C%2011-5b8cff">
-    <img alt="Languages" src="https://img.shields.io/badge/UI-English%20%7C%20Français-34d6c7">
-    <img alt="License" src="https://img.shields.io/badge/license-MIT-7061ff">
+    <img alt="Windows" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0067c0">
+    <img alt="Languages" src="https://img.shields.io/badge/UI-English%20%7C%20Français-0067c0">
+    <img alt="License" src="https://img.shields.io/badge/license-MIT-0067c0">
   </p>
   <p>
     <a href="https://buco7854.github.io/cs2migrate/"><strong>Download the latest main build</strong></a>
@@ -20,7 +19,12 @@
 
 ---
 
-CS2 Migrate is a Windows desktop app for safely copying Counter-Strike 2 settings between Steam accounts on the same PC. It discovers Steam and local accounts automatically, shows cached profile pictures when available, previews every file, and publishes as one self-contained executable. The app and download site support English and French with automatic OS/browser detection and a remembered manual override.
+CS2 Migrate is a Windows desktop app that copies Counter-Strike 2 settings from one local Steam account to another. It finds Steam and its accounts by itself, lists every file it is about to write, backs up whatever it replaces, and ships as a single self-contained executable.
+
+- **No setup.** No installer, no Steam Web API key, no administrator rights, no need to know where CS2 keeps its config.
+- **Reversible.** Every replaced file is backed up, and a sealed copy of the migration is kept in case Steam Cloud overwrites it later.
+- **Native.** A WPF interface built on the Windows 11 design language: it follows your system light/dark setting and your accent colour.
+- **Bilingual.** English and French, detected from Windows (or your browser, on the site) and overridable.
 
 ![CS2 Migrate interface preview](docs/social-preview.svg)
 
@@ -38,16 +42,14 @@ Machine-generated settings, unknown files, `steam_autocloud.vdf`, and `remotecac
 ## Quick start
 
 1. Download `CS2Migrate.exe` from **https://buco7854.github.io/cs2migrate/**.
-2. Open it—the Steam installation, accounts, language, and locally cached avatars are detected automatically.
-3. Pick the source and target, close Steam when prompted, review the file preview, and click **Migrate settings**.
-
-No installation, Steam Web API key, administrator access, or knowledge of CS2 folders is required.
+2. Open it. The Steam installation, its accounts, the interface language, and locally cached avatars are all detected automatically.
+3. Choose the **Copy from** and **Copy to** accounts, close Steam when the app asks, review the file list, and click **Migrate settings**.
 
 ## Friend sessions and account backups
 
-- Enable **Temporary friend session** before migrating onto a borrowed account. The app protects the friend’s exact original state and later changes its main action to **Restore friend’s settings**. Files introduced only for the temporary session are removed during restoration.
-- **Back up target** creates a verified snapshot of every recognized portable setting for the selected target account.
-- **Restore latest** restores that account’s newest manual snapshot. The current state receives its own safety backup first.
+- Turn on **Temporary friend session** before migrating onto a borrowed account. The app protects the friend’s exact original state and later changes its main action to **Restore friend’s settings**. Files introduced only for the temporary session are removed during restoration.
+- **Back up** creates a verified snapshot of every recognized portable setting for the destination account.
+- **Restore** puts that account back to its newest manual snapshot. The current state receives its own safety backup first.
 - If Steam Cloud replaces migrated settings, the app detects the hash mismatch and offers to reapply the sealed migration copy after Steam closes.
 
 ## How it stays safe
@@ -63,9 +65,11 @@ No installation, Steam Web API key, administrator access, or knowledge of CS2 fo
 
 Steam’s own documentation explains that Auto-Cloud synchronizes configured files when an app launches and exits, and that `steam_autocloud.vdf` is a marker Steam creates in configured locations. That is why this project treats a fully closed Steam client—not metadata deletion—as the safe migration boundary: [Steam Cloud documentation](https://partner.steamgames.com/doc/features/cloud?language=english).
 
-## Zero-setup discovery
+## How discovery works
 
 On startup, the app reads Steam’s Windows registry entries and then checks the standard installation path. It discovers accounts from `userdata` and enriches them with `config/loginusers.vdf` and locally cached avatars. **Choose Steam folder** appears as a fallback only when automatic detection cannot validate the installation. A manually selected language is remembered; otherwise French is selected for a French Windows UI culture and English is used for every other language.
+
+The interface reads `AppsUseLightTheme` and the Windows accent colour at startup and reacts to changes while it runs, so it matches the rest of the system without a setting of its own.
 
 ## Build locally
 

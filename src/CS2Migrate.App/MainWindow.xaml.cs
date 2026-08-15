@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Media;
 using CS2Migrate.Core;
 using CS2Migrate.Core.Models;
 using Microsoft.Win32;
@@ -116,14 +115,11 @@ internal sealed class MainWindowViewModel : ObservableObject
     private string? _busyLabelKey;
     private string _steamDirectory = string.Empty;
     private string _environmentStatus = string.Empty;
-    private Brush _environmentBrush = BrushFrom("#F5AA42");
+    private StatusSeverity _environmentSeverity = StatusSeverity.Caution;
     private bool _hasBlockingProcesses;
     private string _safetyTitle = string.Empty;
     private string _safetyDetail = string.Empty;
-    private string _safetyIcon = "…";
-    private Brush _safetyBackground = BrushFrom("#171625");
-    private Brush _safetyBorder = BrushFrom("#3A3450");
-    private Brush _safetyIconBackground = BrushFrom("#302B48");
+    private StatusSeverity _safetySeverity = StatusSeverity.Informational;
     private string _previewSummary = string.Empty;
     private string _previewSize = "0 B";
     private string _activityTitle = string.Empty;
@@ -223,7 +219,7 @@ internal sealed class MainWindowViewModel : ObservableObject
     }
 
     public string EnvironmentStatus { get => _environmentStatus; private set => SetProperty(ref _environmentStatus, value); }
-    public Brush EnvironmentBrush { get => _environmentBrush; private set => SetProperty(ref _environmentBrush, value); }
+    public StatusSeverity EnvironmentSeverity { get => _environmentSeverity; private set => SetProperty(ref _environmentSeverity, value); }
     public bool HasBlockingProcesses
     {
         get => _hasBlockingProcesses;
@@ -239,10 +235,7 @@ internal sealed class MainWindowViewModel : ObservableObject
     }
     public string SafetyTitle { get => _safetyTitle; private set => SetProperty(ref _safetyTitle, value); }
     public string SafetyDetail { get => _safetyDetail; private set => SetProperty(ref _safetyDetail, value); }
-    public string SafetyIcon { get => _safetyIcon; private set => SetProperty(ref _safetyIcon, value); }
-    public Brush SafetyBackground { get => _safetyBackground; private set => SetProperty(ref _safetyBackground, value); }
-    public Brush SafetyBorder { get => _safetyBorder; private set => SetProperty(ref _safetyBorder, value); }
-    public Brush SafetyIconBackground { get => _safetyIconBackground; private set => SetProperty(ref _safetyIconBackground, value); }
+    public StatusSeverity SafetySeverity { get => _safetySeverity; private set => SetProperty(ref _safetySeverity, value); }
     public string PreviewSummary { get => _previewSummary; private set => SetProperty(ref _previewSummary, value); }
     public string PreviewSize { get => _previewSize; private set => SetProperty(ref _previewSize, value); }
     public string ActivityTitle { get => _activityTitle; private set => SetProperty(ref _activityTitle, value); }
@@ -350,7 +343,7 @@ internal sealed class MainWindowViewModel : ObservableObject
                 ClearBackupState();
                 SteamDirectory = steamDirectory ?? string.Empty;
                 EnvironmentStatus = LanguageService.Text("SteamFolderNeeded");
-                EnvironmentBrush = BrushFrom("#F5AA42");
+                EnvironmentSeverity = StatusSeverity.Caution;
                 ActivityTitle = LanguageService.Text("SteamNotFound");
                 ActivityDetail = LanguageService.Text("SteamNotFoundDetail");
                 RefreshSafetyState();
@@ -375,7 +368,7 @@ internal sealed class MainWindowViewModel : ObservableObject
             EnvironmentStatus = Accounts.Count == 1
                 ? LanguageService.Text("AccountsFoundOne")
                 : LanguageService.Format("AccountsFoundMany", Accounts.Count);
-            EnvironmentBrush = Accounts.Count >= 2 ? BrushFrom("#34D6C7") : BrushFrom("#F5AA42");
+            EnvironmentSeverity = Accounts.Count >= 2 ? StatusSeverity.Success : StatusSeverity.Caution;
             ActivityTitle = Accounts.Count >= 2
                 ? LanguageService.Text("AccountsLoaded")
                 : LanguageService.Text("SecondAccountNeeded");
@@ -391,7 +384,7 @@ internal sealed class MainWindowViewModel : ObservableObject
             Accounts.Clear();
             ClearBackupState();
             EnvironmentStatus = LanguageService.Text("SteamDataUnavailable");
-            EnvironmentBrush = BrushFrom("#F06D78");
+            EnvironmentSeverity = StatusSeverity.Critical;
             ActivityTitle = LanguageService.Text("CouldNotReadAccounts");
             ActivityDetail = exception.Message;
             RefreshSafetyState();
@@ -633,10 +626,7 @@ internal sealed class MainWindowViewModel : ObservableObject
             SafetyDetail = HasBlockingProcesses
                 ? LanguageService.Text("FriendRestoreRunningDetail")
                 : LanguageService.Text("FriendRestoreReadyDetail");
-            SafetyIcon = "↩";
-            SafetyBackground = BrushFrom("#1A2033");
-            SafetyBorder = BrushFrom("#40537D");
-            SafetyIconBackground = BrushFrom("#293B61");
+            SafetySeverity = StatusSeverity.Informational;
             UpdateMigrationButtonText();
             OnPropertyChanged(nameof(CanMigrate));
             return;
@@ -648,10 +638,7 @@ internal sealed class MainWindowViewModel : ObservableObject
             SafetyDetail = HasBlockingProcesses
                 ? LanguageService.Text("CloudRecoveryRunningDetail")
                 : LanguageService.Text("CloudRecoveryReadyDetail");
-            SafetyIcon = "↻";
-            SafetyBackground = BrushFrom("#201A30");
-            SafetyBorder = BrushFrom("#514184");
-            SafetyIconBackground = BrushFrom("#3C3065");
+            SafetySeverity = StatusSeverity.Informational;
             UpdateMigrationButtonText();
             OnPropertyChanged(nameof(CanMigrate));
             return;
@@ -663,19 +650,13 @@ internal sealed class MainWindowViewModel : ObservableObject
                 "CloseProcesses",
                 string.Join(LanguageService.Text("ProcessJoiner"), blockers));
             SafetyDetail = LanguageService.Text("CloseProcessesDetail");
-            SafetyIcon = "!";
-            SafetyBackground = BrushFrom("#261B20");
-            SafetyBorder = BrushFrom("#5E323B");
-            SafetyIconBackground = BrushFrom("#5A2833");
+            SafetySeverity = StatusSeverity.Caution;
         }
         else
         {
             SafetyTitle = LanguageService.Text("SafeToMigrate");
             SafetyDetail = LanguageService.Text("SafeToMigrateDetail");
-            SafetyIcon = "✓";
-            SafetyBackground = BrushFrom("#10221F");
-            SafetyBorder = BrushFrom("#24564F");
-            SafetyIconBackground = BrushFrom("#1C4B44");
+            SafetySeverity = StatusSeverity.Success;
         }
 
         UpdateMigrationButtonText();
@@ -885,11 +866,4 @@ internal sealed class MainWindowViewModel : ObservableObject
         < 1024 * 1024 => $"{bytes / 1024d:0.#} KB",
         _ => $"{bytes / 1024d / 1024d:0.#} MB"
     };
-
-    private static SolidColorBrush BrushFrom(string hex)
-    {
-        var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
-        brush.Freeze();
-        return brush;
-    }
 }

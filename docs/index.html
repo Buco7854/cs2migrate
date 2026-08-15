@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Safely move Counter-Strike 2 settings between Steam accounts with one portable Windows app.">
+  <meta name="theme-color" content="#080c18">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="CS2 Migrate — move your setup, keep your edge">
+  <meta property="og:description" content="Safe, visual CS2 settings migration for local Steam accounts.">
+  <meta property="og:url" content="https://buco7854.github.io/cs2migrate/">
+  <meta name="twitter:card" content="summary">
+  <title>CS2 Migrate — move your setup, keep your edge</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="glow glow-one"></div>
+  <div class="glow glow-two"></div>
+
+  <nav class="nav shell" aria-label="Main navigation">
+    <a class="brand" href="#top" aria-label="CS2 Migrate home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><path d="M11 17h17m-5-5 5 5-5 5m14 9H20m5-5-5 5 5 5"/></svg>
+      </span>
+      <span>CS2 MIGRATE</span>
+    </a>
+    <div class="nav-links">
+      <a href="#safety" data-i18n="navSafety">Safety</a>
+      <a href="#how" data-i18n="navHow">How it works</a>
+      <a href="https://github.com/Buco7854/cs2migrate">GitHub</a>
+      <button class="language-toggle" id="language-toggle" type="button" aria-label="Passer en français">FR</button>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <div class="eyebrow"><span></span><span data-i18n="heroEyebrow">Open source · local-first</span></div>
+        <h1><span data-i18n="heroLineOne">Move your setup.</span><br><em data-i18n="heroLineTwo">Keep your edge.</em></h1>
+        <p class="lede" data-i18n="heroLead">Sensitivity, crosshair, keybinds, video settings, and autoexec—moved safely between local Steam accounts in a few clicks.</p>
+        <div class="hero-actions">
+          <a class="button primary" id="download-button" href="download/CS2Migrate.exe" download>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 20h14"/></svg>
+            <span data-i18n="downloadWindows">Download for Windows</span>
+          </a>
+          <a class="button secondary" href="https://github.com/Buco7854/cs2migrate" data-i18n="viewSource">View source</a>
+        </div>
+        <div class="build-line">
+          <span class="live-dot"></span>
+          <span id="build-label" data-i18n="latestBuild">Latest successful main build</span>
+          <span class="divider"></span>
+          <span id="build-size" data-i18n="selfContained">Self-contained x64 executable</span>
+        </div>
+      </div>
+
+      <div class="product-wrap" aria-label="Preview of the CS2 Migrate interface">
+        <div class="product-shadow"></div>
+        <div class="product">
+          <div class="window-bar">
+            <div class="mini-brand"><span class="brand-mark small">⇄</span> CS2 MIGRATE</div>
+            <div class="window-status"><i></i> <span data-i18n="mockAccounts">3 local accounts</span></div>
+          </div>
+          <div class="product-body">
+            <div class="step-label" data-i18n="mockChoose">CHOOSE YOUR ACCOUNTS</div>
+            <div class="accounts">
+              <article class="account source">
+                <div class="account-role" data-i18n="source">SOURCE</div>
+                <div class="person">
+                  <div class="avatar avatar-one">B</div>
+                  <div><strong>blueentry</strong><small>buco · 39734273</small></div>
+                </div>
+                <div class="health"><i></i> <span data-i18n="mockFiles">4 portable settings files</span></div>
+              </article>
+              <div class="transfer">→</div>
+              <article class="account target">
+                <div class="account-role" data-i18n="target">TARGET</div>
+                <div class="person">
+                  <div class="avatar avatar-two">K</div>
+                  <div><strong>kz enjoyer</strong><small>altaccount · 80421061</small></div>
+                </div>
+                <div class="health"><i></i> <span data-i18n="mockReady">Ready for migration</span></div>
+              </article>
+            </div>
+            <div class="options">
+              <div class="option selected"><b>✓</b><span><span data-i18n="gameplay">Gameplay</span><small data-i18n="gameplayShort">Sensitivity, crosshair</small></span></div>
+              <div class="option selected"><b>✓</b><span><span data-i18n="keybinds">Keybinds</span><small data-i18n="keybindsShort">Keyboard and mouse</small></span></div>
+              <div class="option selected"><b>✓</b><span><span data-i18n="video">Video</span><small data-i18n="videoShort">Resolution, graphics</small></span></div>
+              <div class="option"><b></b><span>Autoexec<small data-i18n="autoexecShort">Custom commands</small></span></div>
+            </div>
+            <div class="safe-row"><span>✓</span><div><strong data-i18n="mockSafe">Files are safe to migrate</strong><small data-i18n="mockSafeDetail">Steam is closed · backup and verification enabled</small></div><button data-i18n="migrate">Migrate settings</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trust-strip">
+      <div class="shell trust-grid">
+        <div><strong data-i18n="trustExe">One .exe</strong><span data-i18n="trustExeDetail">No installer or runtime</span></div>
+        <div><strong data-i18n="trustOffline">Offline by default</strong><span data-i18n="trustOfflineDetail">No API key or tracking</span></div>
+        <div><strong data-i18n="trustBackup">Automatic backups</strong><span data-i18n="trustBackupDetail">Every replaced file</span></div>
+        <div><strong data-i18n="trustOpen">Open source</strong><span data-i18n="trustOpenDetail">Inspect every line</span></div>
+      </div>
+    </section>
+
+    <section class="section shell" id="safety">
+      <div class="section-heading">
+        <div class="eyebrow"><span></span><span data-i18n="safetyEyebrow">Designed around your files</span></div>
+        <h2 data-i18n="safetyTitle">Careful where it matters.</h2>
+        <p data-i18n="safetyLead">The original script was a useful proof of concept. The app turns it into a previewable transaction with guardrails at every write.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature featured">
+          <div class="feature-icon">⌁</div>
+          <span class="feature-number">01</span>
+          <h3 data-i18n="featureSteam">Steam-aware</h3>
+          <p data-i18n="featureSteamDetail">Migration stays locked while Steam or CS2 is running. The app uses Steam’s normal shutdown command and never force-kills it.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon">◫</div>
+          <span class="feature-number">02</span>
+          <h3 data-i18n="featureBackup">Backup first</h3>
+          <p data-i18n="featureBackupDetail">Every matching target file and a sealed recovery copy are saved outside Steam’s folders with a readable JSON manifest.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon">◇</div>
+          <span class="feature-number">03</span>
+          <h3 data-i18n="featureVerify">Verified twice</h3>
+          <p data-i18n="featureVerifyDetail">Files are SHA-256 checked after staging and after commit. A failed transaction rolls back what it changed.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon">⊘</div>
+          <span class="feature-number">04</span>
+          <h3 data-i18n="featureCleanup">Friend mode</h3>
+          <p data-i18n="featureCleanupDetail">Borrow an account without leaving your setup behind. One click later restores the friend’s exact original configuration.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section workflow-section" id="how">
+      <div class="shell workflow-grid">
+        <div class="section-heading sticky">
+          <div class="eyebrow"><span></span><span data-i18n="stepsEyebrow">Three calm steps</span></div>
+          <h2 data-i18n="stepsTitle">From fragging to fragging.</h2>
+          <p data-i18n="stepsLead">Account discovery and local profile images make it hard to pick the wrong player. A precise preview makes the final action obvious.</p>
+        </div>
+        <ol class="steps">
+          <li><span>1</span><div><h3 data-i18n="stepOne">Pick the source and target</h3><p data-i18n="stepOneDetail">Steam accounts already used on this PC appear automatically, with persona names, account IDs, and cached avatars.</p></div></li>
+          <li><span>2</span><div><h3 data-i18n="stepTwo">Choose exactly what moves</h3><p data-i18n="stepTwoDetail">Toggle gameplay, keybinds, video, or autoexec. See which target files are new and which will be replaced.</p></div></li>
+          <li><span>3</span><div><h3 data-i18n="stepThree">Close Steam and migrate</h3><p data-i18n="stepThreeDetail">The app stages, backs up, commits, and verifies. If Steam Cloud restores old settings later, the sealed copy can be reapplied.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="download shell">
+      <div>
+        <div class="eyebrow light"><span></span><span data-i18n="downloadEyebrow">Built fresh from main</span></div>
+        <h2 data-i18n="downloadTitle">Your config deserves a better moving day.</h2>
+        <p data-i18n="downloadLead">No install wizard. Download one executable, close Steam, and run it.</p>
+      </div>
+      <div class="download-card">
+        <a class="button primary full" id="download-button-bottom" href="download/CS2Migrate.exe" download data-i18n="downloadExe">Download CS2Migrate.exe</a>
+        <div class="checksum">
+          <span>SHA-256</span>
+          <code id="checksum">Available after first build</code>
+          <button id="copy-checksum" type="button" aria-label="Copy checksum" data-i18n="copy">Copy</button>
+        </div>
+        <small data-i18n="requirements">Windows 10/11 · x64 · no administrator access · unsigned development build</small>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell footer">
+    <a class="brand" href="#top"><span class="brand-mark small">⇄</span><span>CS2 MIGRATE</span></a>
+    <p data-i18n="disclaimer">Not affiliated with Valve or Steam. Counter-Strike and Steam are trademarks of Valve Corporation.</p>
+    <a href="https://github.com/Buco7854/cs2migrate" data-i18n="license">MIT licensed ↗</a>
+  </footer>
+</body>
+</html>

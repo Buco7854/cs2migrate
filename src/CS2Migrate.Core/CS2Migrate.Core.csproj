@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>CS2Migrate.Core</AssemblyName>
+    <RootNamespace>CS2Migrate.Core</RootNamespace>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,110 @@
+name: Build app and publish latest
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Test and package Windows app
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore CS2Migrate.sln
+
+      - name: Build
+        run: dotnet build CS2Migrate.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test CS2Migrate.sln --configuration Release --no-build --logger "console;verbosity=normal"
+
+      - name: Publish single-file app
+        run: >-
+          dotnet publish src/CS2Migrate.App/CS2Migrate.App.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          --no-restore
+          --output publish
+
+      - name: Prepare checksums and site metadata
+        shell: pwsh
+        run: |
+          $exePath = Join-Path $env:GITHUB_WORKSPACE "publish/CS2Migrate.exe"
+          if (-not (Test-Path $exePath)) {
+            throw "Published executable was not found at $exePath"
+          }
+
+          $hash = (Get-FileHash -Path $exePath -Algorithm SHA256).Hash.ToLowerInvariant()
+          $size = (Get-Item $exePath).Length
+          "$hash  CS2Migrate.exe" | Set-Content -Path "publish/SHA256SUMS.txt" -Encoding utf8
+
+          New-Item -ItemType Directory -Path "docs/download" -Force | Out-Null
+          Copy-Item -Path $exePath -Destination "docs/download/CS2Migrate.exe" -Force
+          Copy-Item -Path "publish/SHA256SUMS.txt" -Destination "docs/download/SHA256SUMS.txt" -Force
+
+          $metadata = [ordered]@{
+            version = "main-${{ github.run_number }}"
+            commit = "${{ github.sha }}"
+            builtAt = (Get-Date).ToUniversalTime().ToString("o")
+            bytes = $size
+            sha256 = $hash
+            download = "download/CS2Migrate.exe"
+          }
+          $metadata | ConvertTo-Json | Set-Content -Path "docs/build-info.json" -Encoding utf8
+
+      - name: Upload executable artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: CS2Migrate-win-x64-${{ github.sha }}
+          path: |
+            publish/CS2Migrate.exe
+            publish/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+
+      - name: Upload download site
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+
+  deploy:
+    name: Deploy latest main build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

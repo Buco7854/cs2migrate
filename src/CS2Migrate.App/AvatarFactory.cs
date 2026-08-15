@@ -72,7 +72,7 @@ internal static class AvatarFactory
                 CultureInfo.CurrentUICulture,
                 FlowDirection.LeftToRight,
                 new Typeface(
-                    new FontFamily("Segoe UI Variable Text, Segoe UI"),
+                    new FontFamily("Segoe UI"),
                     FontStyles.Normal,
                     FontWeights.SemiBold,
                     FontStretches.Normal),

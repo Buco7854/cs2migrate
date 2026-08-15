@@ -26,6 +26,8 @@
     <system:String x:Key="FriendMode">Session temporaire chez un ami</system:String>
     <system:String x:Key="FriendModeDetail">Protégez les réglages actuels du compte cible, utilisez les vôtres, puis restaurez les siens en un clic.</system:String>
     <system:String x:Key="PreviewTitle">Fichiers à écrire</system:String>
+    <system:String x:Key="PreviewEmpty">Rien à écrire pour l’instant.</system:String>
+    <system:String x:Key="ChooseAccount">Choisissez un compte</system:String>
     <system:String x:Key="PreviewBackupDetail">Une sauvegarde horodatée et une copie de récupération scellée sont créées avant tout remplacement.</system:String>
     <system:String x:Key="CloseSteamSafely">Fermer Steam</system:String>
     <system:String x:Key="OpenBackups">Dossier des sauvegardes</system:String>

@@ -3,8 +3,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <FontFamily x:Key="BodyFontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
-    <FontFamily x:Key="DisplayFontFamily">Segoe UI Variable Display, Segoe UI</FontFamily>
+    <!-- Segoe UI, not Segoe UI Variable: WPF's text stack does not handle variable fonts
+         reliably, and the variable faces can measure but fail to paint. -->
+    <FontFamily x:Key="BodyFontFamily">Segoe UI</FontFamily>
+    <FontFamily x:Key="DisplayFontFamily">Segoe UI</FontFamily>
     <FontFamily x:Key="IconFontFamily">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
     <FontFamily x:Key="MonoFontFamily">Cascadia Mono, Consolas, Courier New</FontFamily>
 
@@ -147,7 +149,7 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Root" Property="Background" Value="{DynamicResource ControlFillDisabledBrush}" />
-                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource ControlFillDisabledBrush}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource ControlStrokeBrush}" />
                             <Setter TargetName="Root" Property="TextElement.Foreground" Value="{DynamicResource TextDisabledBrush}" />
                             <Setter Property="Cursor" Value="Arrow" />
                         </Trigger>
@@ -485,6 +487,10 @@
                                           Content="{TemplateBinding SelectionBoxItem}"
                                           ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                           ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
+                        <!-- Placeholder text for an empty picker; the prompt is passed in through Tag. -->
+                        <TextBlock x:Name="Placeholder" Text="{TemplateBinding Tag}" Visibility="Collapsed"
+                                   Margin="12,0,40,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                                   Foreground="{DynamicResource TextTertiaryBrush}" />
                         <TextBlock Text="&#xE70D;" FontFamily="{DynamicResource IconFontFamily}" FontSize="11"
                                    Foreground="{DynamicResource TextSecondaryBrush}" IsHitTestVisible="False"
                                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" />
@@ -507,6 +513,9 @@
                         </Popup>
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="SelectedItem" Value="{x:Null}">
+                            <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+                        </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5" />
                             <Setter Property="Cursor" Value="Arrow" />

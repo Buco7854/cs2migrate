@@ -26,6 +26,8 @@
     <system:String x:Key="FriendMode">Temporary friend session</system:String>
     <system:String x:Key="FriendModeDetail">Protect the target account’s current settings, use yours temporarily, then restore theirs in one click.</system:String>
     <system:String x:Key="PreviewTitle">Files to write</system:String>
+    <system:String x:Key="PreviewEmpty">Nothing to write yet.</system:String>
+    <system:String x:Key="ChooseAccount">Choose an account</system:String>
     <system:String x:Key="PreviewBackupDetail">A timestamped backup and a sealed recovery copy are created before any file is replaced.</system:String>
     <system:String x:Key="CloseSteamSafely">Close Steam</system:String>
     <system:String x:Key="OpenBackups">Backups folder</system:String>

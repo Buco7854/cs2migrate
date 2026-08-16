@@ -49,7 +49,7 @@ Machine-generated settings, unknown files, `steam_autocloud.vdf`, and `remotecac
 
 - Turn on **Temporary friend session** before migrating onto a borrowed account. The app protects the friend’s exact original state and later changes its main action to **Restore friend’s settings**. Files introduced only for the temporary session are removed during restoration.
 - **Back up** creates a verified snapshot of every recognized portable setting for the destination account.
-- **Restore** puts that account back to its newest manual snapshot. The current state receives its own safety backup first.
+- **History** lists every archived version of the destination account — the state before each migration, every manual backup, every automatic safety copy — and writes any of them back, whole or one file at a time. The files being replaced are archived first, so a restore can itself be undone.
 - If Steam Cloud replaces migrated settings, the app detects the hash mismatch and offers to reapply the sealed migration copy after Steam closes.
 
 ## How it stays safe

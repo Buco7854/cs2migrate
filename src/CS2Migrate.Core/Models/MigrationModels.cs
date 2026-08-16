@@ -73,6 +73,18 @@ public sealed record RestorePoint(
     RestorePointKind Kind,
     IReadOnlyList<RestorePointFile> Files);
 
+public sealed record ConfigPackageEntry(
+    string Name,
+    MigrationCategory Category,
+    long Length,
+    string Sha256);
+
+public sealed record ConfigPackage(
+    string FilePath,
+    DateTimeOffset CreatedUtc,
+    string AccountName,
+    IReadOnlyList<ConfigPackageEntry> Entries);
+
 public sealed record TemporarySessionRecovery(
     SteamAccount Target,
     string ArchiveDirectory,

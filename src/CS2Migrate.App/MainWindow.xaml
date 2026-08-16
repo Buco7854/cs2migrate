@@ -223,6 +223,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Safety info bar -->
@@ -345,8 +346,60 @@
                 </StackPanel>
             </Border>
 
-            <!-- Preview -->
+
+            <!-- Per-account tools -->
             <Border Grid.Row="3" Style="{StaticResource CardStyle}" Margin="0,12,0,0">
+                <StackPanel>
+                    <TextBlock Text="{DynamicResource ManageTitle}" Style="{StaticResource SubtitleTextStyle}" />
+                    <TextBlock Text="{DynamicResource ManageDetail}" Style="{StaticResource CaptionTextStyle}" Margin="0,3,0,14" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                            <ComboBox ItemsSource="{Binding Accounts}" SelectedItem="{Binding ManagedAccount}"
+                                      ItemTemplate="{StaticResource AccountTemplate}"
+                                      Tag="{DynamicResource ChooseAccount}" MaxWidth="360" HorizontalAlignment="Left" />
+                            <ContentControl Content="{Binding ManagedAccount}"
+                                            ContentTemplate="{StaticResource AccountHealthTemplate}" />
+                        </StackPanel>
+                        <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                            <Button Click="Export_Click" IsEnabled="{Binding CanExport}" Margin="0,0,8,0"
+                                    ToolTip="{DynamicResource ExportTip}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xEDE1;" Style="{StaticResource CommandGlyphStyle}" />
+                                    <TextBlock Text="{DynamicResource Export}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Click="Import_Click" IsEnabled="{Binding CanImport}" Margin="0,0,8,0"
+                                    ToolTip="{DynamicResource ImportTip}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8B5;" Style="{StaticResource CommandGlyphStyle}" />
+                                    <TextBlock Text="{DynamicResource Import}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Click="History_Click" IsEnabled="{Binding CanOpenHistory}" Margin="0,0,8,0"
+                                    ToolTip="{DynamicResource HistoryTip}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE81C;" Style="{StaticResource CommandGlyphStyle}" />
+                                    <TextBlock Text="{DynamicResource History}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Click="BackupTarget_Click" IsEnabled="{Binding CanBackupManaged}"
+                                    ToolTip="{DynamicResource BackupTargetTip}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE74E;" Style="{StaticResource CommandGlyphStyle}" />
+                                    <TextBlock Text="{DynamicResource BackupTarget}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </WrapPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Preview -->
+            <Border Grid.Row="4" Style="{StaticResource CardStyle}" Margin="0,12,0,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -412,20 +465,6 @@
                                TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button IsEnabled="{Binding CanBackupTarget}" Click="BackupTarget_Click" Margin="0,0,8,0"
-                            ToolTip="{DynamicResource BackupTargetTip}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE74E;" Style="{StaticResource CommandGlyphStyle}" />
-                            <TextBlock Text="{DynamicResource BackupTarget}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                    <Button IsEnabled="{Binding CanOpenHistory}" Click="History_Click" Margin="0,0,8,0"
-                            ToolTip="{DynamicResource HistoryTip}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE81C;" Style="{StaticResource CommandGlyphStyle}" />
-                            <TextBlock Text="{DynamicResource History}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
                     <Button Click="OpenBackups_Click" Margin="0,0,16,0"
                             ToolTip="{DynamicResource OpenBackupsTip}">
                         <StackPanel Orientation="Horizontal">

@@ -99,48 +99,27 @@ public sealed class RestorePointService(IProcessInspector? processInspector = nu
             throw new MigrationException("Choose at least one file to restore.");
         }
 
-        // The engine only reads a real Steam layout, so lay the chosen versions out that way.
-        var stagingRoot = Path.Combine(Path.GetTempPath(), $"cs2migrate-restore-{Guid.NewGuid():N}");
-        var stagingUserData = Path.Combine(stagingRoot, "userdata");
-        var stagingConfig = Path.Combine(stagingUserData, SteamConstants.Cs2AppId, "local", "cfg");
-
-        try
+        var staged = wanted.Select(file => new StagedFile(file.Name, async (destination, token) =>
         {
-            Directory.CreateDirectory(stagingConfig);
-            foreach (var file in wanted)
+            if (!File.Exists(file.ArchivePath) ||
+                !string.Equals(ComputeSha256(file.ArchivePath), file.Sha256, StringComparison.OrdinalIgnoreCase))
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (!File.Exists(file.ArchivePath) ||
-                    !string.Equals(ComputeSha256(file.ArchivePath), file.Sha256, StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new MigrationException("The selected backup is incomplete or damaged.");
-                }
-
-                File.Copy(file.ArchivePath, Path.Combine(stagingConfig, file.Name), overwrite: true);
+                throw new MigrationException("The selected backup is incomplete or damaged.");
             }
 
-            var snapshotAccount = new SteamAccount(
-                account.AccountId == uint.MaxValue ? uint.MaxValue - 1 : uint.MaxValue,
-                SteamConstants.SteamId64Base + (account.AccountId == uint.MaxValue ? uint.MaxValue - 1 : uint.MaxValue),
-                account.DisplayName,
-                string.Empty,
-                stagingUserData,
-                stagingConfig,
-                account.AvatarPath,
-                false,
-                restorePoint.CreatedUtc,
-                wanted.Length);
+            await using var input = File.OpenRead(file.ArchivePath);
+            await using var output = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None);
+            await input.CopyToAsync(output, token);
+        })).ToArray();
 
-            var engine = new MigrationEngine(_processInspector);
-            return await engine.MigrateAsync(
-                new MigrationRequest(snapshotAccount, account, MigrationCategory.AllPortable, backupRoot),
-                progress,
-                cancellationToken);
-        }
-        finally
-        {
-            TryDeleteDirectory(stagingRoot);
-        }
+        return await StagedWrite.ApplyAsync(
+            account,
+            staged,
+            backupRoot,
+            _processInspector,
+            restorePoint.CreatedUtc,
+            progress,
+            cancellationToken);
     }
 
     /// <summary>

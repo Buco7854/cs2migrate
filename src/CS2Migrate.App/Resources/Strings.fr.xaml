@@ -68,6 +68,29 @@
     <system:String x:Key="ThemeLight">Clair</system:String>
     <system:String x:Key="ThemeDark">Sombre</system:String>
 
+    <system:String x:Key="ManageTitle">Gérer un compte</system:String>
+    <system:String x:Key="ManageDetail">Exportez une configuration dans un fichier, réimportez-en une, parcourez les versions précédentes ou enregistrez un instantané.</system:String>
+    <system:String x:Key="Export">Exporter</system:String>
+    <system:String x:Key="ExportTip">Enregistrer les réglages de ce compte dans un fichier à conserver ou à partager</system:String>
+    <system:String x:Key="Import">Importer</system:String>
+    <system:String x:Key="ImportTip">Écrire un fichier de réglages dans ce compte</system:String>
+    <system:String x:Key="ExportDialogTitle">Enregistrer les réglages de ce compte</system:String>
+    <system:String x:Key="ImportDialogTitle">Choisir un fichier de réglages à importer</system:String>
+    <system:String x:Key="PackageFilter">Réglages CS2 Migrate (*.cs2config)|*.cs2config|Tous les fichiers (*.*)|*.*</system:String>
+    <system:String x:Key="Exporting">Exportation…</system:String>
+    <system:String x:Key="ExportComplete">Réglages exportés</system:String>
+    <system:String x:Key="ExportCompleteDetail">{0} fichier(s) écrits dans {1}.</system:String>
+    <system:String x:Key="ExportStopped">Exportation arrêtée</system:String>
+    <system:String x:Key="Importing">Importation…</system:String>
+    <system:String x:Key="ImportComplete">Réglages importés</system:String>
+    <system:String x:Key="ImportCompleteDetail">{0} fichier(s) écrits sur {1} et vérifiés.</system:String>
+    <system:String x:Key="ImportStopped">Importation arrêtée</system:String>
+    <system:String x:Key="ConfirmImportTitle">Importer des réglages</system:String>
+    <system:String x:Key="ConfirmImportMessage">Écrire {0} fichier(s) de réglages exportés depuis « {1} » dans « {2} » ?&#10;&#10;Les fichiers remplacés sont archivés au préalable : l’opération peut être annulée depuis l’historique.</system:String>
+    <system:String x:Key="CancelButton">Annuler</system:String>
+    <system:String x:Key="BackUpThenMigrate">Sauvegarder puis migrer</system:String>
+    <system:String x:Key="MigrateWithoutBackup">Migrer sans</system:String>
+
     <system:String x:Key="AccountIdentityFallback">ID Steam · {0}</system:String>
     <system:String x:Key="NoPortableFiles">Aucun réglage CS2 portable trouvé</system:String>
     <system:String x:Key="OnePortableFile">1 fichier de réglages portable</system:String>

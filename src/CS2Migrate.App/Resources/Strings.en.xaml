@@ -68,6 +68,29 @@
     <system:String x:Key="ThemeLight">Light</system:String>
     <system:String x:Key="ThemeDark">Dark</system:String>
 
+    <system:String x:Key="ManageTitle">Manage one account</system:String>
+    <system:String x:Key="ManageDetail">Export a config to a file, import one back, browse earlier versions, or take a snapshot now.</system:String>
+    <system:String x:Key="Export">Export</system:String>
+    <system:String x:Key="ExportTip">Save this account's settings to a single file you can keep or share</system:String>
+    <system:String x:Key="Import">Import</system:String>
+    <system:String x:Key="ImportTip">Write a settings file into this account</system:String>
+    <system:String x:Key="ExportDialogTitle">Save the settings of this account</system:String>
+    <system:String x:Key="ImportDialogTitle">Choose a settings file to import</system:String>
+    <system:String x:Key="PackageFilter">CS2 Migrate settings (*.cs2config)|*.cs2config|All files (*.*)|*.*</system:String>
+    <system:String x:Key="Exporting">Exporting…</system:String>
+    <system:String x:Key="ExportComplete">Settings exported</system:String>
+    <system:String x:Key="ExportCompleteDetail">{0} file(s) written to {1}.</system:String>
+    <system:String x:Key="ExportStopped">Export stopped</system:String>
+    <system:String x:Key="Importing">Importing…</system:String>
+    <system:String x:Key="ImportComplete">Settings imported</system:String>
+    <system:String x:Key="ImportCompleteDetail">{0} file(s) written to {1} and verified.</system:String>
+    <system:String x:Key="ImportStopped">Import stopped</system:String>
+    <system:String x:Key="ConfirmImportTitle">Import settings</system:String>
+    <system:String x:Key="ConfirmImportMessage">Write {0} settings file(s) exported from “{1}” into “{2}”?&#10;&#10;The files being replaced are archived first, so this can be undone from the history.</system:String>
+    <system:String x:Key="CancelButton">Cancel</system:String>
+    <system:String x:Key="BackUpThenMigrate">Back up, then migrate</system:String>
+    <system:String x:Key="MigrateWithoutBackup">Migrate without</system:String>
+
     <system:String x:Key="AccountIdentityFallback">Steam ID · {0}</system:String>
     <system:String x:Key="NoPortableFiles">No portable CS2 settings found</system:String>
     <system:String x:Key="OnePortableFile">1 portable settings file</system:String>

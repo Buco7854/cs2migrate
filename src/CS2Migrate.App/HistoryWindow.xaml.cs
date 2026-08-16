@@ -52,17 +52,16 @@ public partial class HistoryWindow : Window
             return;
         }
 
-        if (MessageBox.Show(
+        if (!MessageDialog.Confirm(
                 this,
+                LanguageService.Text("ConfirmHistoryRestoreTitle"),
                 LanguageService.Format(
                     "ConfirmHistoryRestoreMessage",
                     names.Length,
                     account.DisplayName,
                     point.Title,
                     point.Timestamp),
-                LanguageService.Text("ConfirmHistoryRestoreTitle"),
-                MessageBoxButton.OKCancel,
-                MessageBoxImage.Warning) != MessageBoxResult.OK)
+                LanguageService.Text("RestoreSelected")))
         {
             return;
         }

@@ -60,7 +60,11 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (MessageBox.Show(this, confirmation.Value.Message, confirmation.Value.Title, MessageBoxButton.OKCancel, MessageBoxImage.Question) != MessageBoxResult.OK)
+        if (!MessageDialog.Confirm(
+                this,
+                confirmation.Value.Title,
+                confirmation.Value.Message,
+                LanguageService.Text("MigrateSettings")))
         {
             return;
         }
@@ -70,21 +74,21 @@ public partial class MainWindow : Window
         if (_viewModel.ShouldOfferTargetBackup)
         {
             var targetName = _viewModel.SelectedTarget!.DisplayName;
-            var answer = MessageBox.Show(
+            var answer = MessageDialog.Ask(
                 this,
-                LanguageService.Format("OfferBackupMessage", targetName),
                 LanguageService.Format("OfferBackupTitle", targetName),
-                MessageBoxButton.YesNoCancel,
-                MessageBoxImage.Warning);
+                LanguageService.Format("OfferBackupMessage", targetName),
+                LanguageService.Text("BackUpThenMigrate"),
+                LanguageService.Text("MigrateWithoutBackup"));
 
-            if (answer == MessageBoxResult.Cancel)
+            if (answer == DialogChoice.Cancel)
             {
                 return;
             }
 
-            if (answer == MessageBoxResult.Yes)
+            if (answer == DialogChoice.Primary)
             {
-                await _viewModel.BackupTargetAsync();
+                await _viewModel.BackupAccountAsync(_viewModel.SelectedTarget!);
                 if (!_viewModel.CanMigrate)
                 {
                     return;
@@ -97,19 +101,89 @@ public partial class MainWindow : Window
 
     private async void BackupTarget_Click(object sender, RoutedEventArgs e)
     {
-        var targetName = _viewModel.SelectedTarget?.DisplayName;
-        if (targetName is null ||
-            MessageBox.Show(
+        var account = _viewModel.ManagedAccount;
+        if (account is null ||
+            !MessageDialog.Confirm(
                 this,
-                LanguageService.Format("ConfirmBackupMessage", targetName),
                 LanguageService.Text("ConfirmBackupTitle"),
-                MessageBoxButton.OKCancel,
-                MessageBoxImage.Question) != MessageBoxResult.OK)
+                LanguageService.Format("ConfirmBackupMessage", account.DisplayName),
+                LanguageService.Text("BackupTarget")))
         {
             return;
         }
 
-        await _viewModel.BackupTargetAsync();
+        await _viewModel.BackupAccountAsync(account);
+    }
+
+    private async void Export_Click(object sender, RoutedEventArgs e)
+    {
+        var account = _viewModel.ManagedAccount;
+        if (account is null)
+        {
+            return;
+        }
+
+        var dialog = new SaveFileDialog
+        {
+            Title = LanguageService.Text("ExportDialogTitle"),
+            FileName = $"{SanitizeFileName(account.DisplayName)}{ConfigPackageService.FileExtension}",
+            DefaultExt = ConfigPackageService.FileExtension,
+            Filter = LanguageService.Text("PackageFilter")
+        };
+
+        if (dialog.ShowDialog(this) == true)
+        {
+            await _viewModel.ExportAsync(account, dialog.FileName);
+        }
+    }
+
+    private async void Import_Click(object sender, RoutedEventArgs e)
+    {
+        var account = _viewModel.ManagedAccount;
+        if (account is null)
+        {
+            return;
+        }
+
+        var dialog = new OpenFileDialog
+        {
+            Title = LanguageService.Text("ImportDialogTitle"),
+            DefaultExt = ConfigPackageService.FileExtension,
+            Filter = LanguageService.Text("PackageFilter"),
+            Multiselect = false
+        };
+
+        if (dialog.ShowDialog(this) != true)
+        {
+            return;
+        }
+
+        var package = _viewModel.ReadPackage(dialog.FileName);
+        if (package is null)
+        {
+            return;
+        }
+
+        if (!MessageDialog.Confirm(
+                this,
+                LanguageService.Text("ConfirmImportTitle"),
+                LanguageService.Format(
+                    "ConfirmImportMessage",
+                    package.Entries.Count,
+                    package.AccountName,
+                    account.DisplayName),
+                LanguageService.Text("Import")))
+        {
+            return;
+        }
+
+        await _viewModel.ImportAsync(account, package);
+    }
+
+    private static string SanitizeFileName(string name)
+    {
+        var cleaned = new string(name.Where(character => !Path.GetInvalidFileNameChars().Contains(character)).ToArray());
+        return string.IsNullOrWhiteSpace(cleaned) ? "cs2-settings" : cleaned.Trim();
     }
 
     private void OpenBackups_Click(object sender, RoutedEventArgs e) => _viewModel.OpenBackups();
@@ -118,7 +192,7 @@ public partial class MainWindow : Window
     {
         var dialog = new HistoryWindow(
             [.. _viewModel.Accounts],
-            _viewModel.SelectedTarget,
+            _viewModel.ManagedAccount,
             _viewModel.LoadRestorePoints)
         {
             Owner = this
@@ -140,6 +214,8 @@ internal sealed class MainWindowViewModel : ObservableObject
     private readonly MigrationEngine _migrationEngine;
     private readonly CloudRecoveryService _cloudRecoveryService = new();
     private readonly RestorePointService _restorePointService;
+    private readonly ConfigPackageService _packageService;
+    private AccountCardViewModel? _managedAccount;
     private readonly AccountBackupService _accountBackupService;
     private AccountCardViewModel? _selectedSource;
     private AccountCardViewModel? _selectedTarget;
@@ -171,6 +247,7 @@ internal sealed class MainWindowViewModel : ObservableObject
         _migrationEngine = new MigrationEngine(_processInspector);
         _accountBackupService = new AccountBackupService(_processInspector);
         _restorePointService = new RestorePointService(_processInspector);
+        _packageService = new ConfigPackageService(_processInspector);
         ResetLocalizedDefaults();
     }
 
@@ -292,6 +369,24 @@ internal sealed class MainWindowViewModel : ObservableObject
                               (HasPendingTemporarySession || GetPreview()?.Files.Count > 0);
     public bool CanBackupTarget => !_isBusy && !HasBlockingProcesses && SelectedTarget?.Account.PortableFileCount > 0;
     public bool CanOpenHistory => !_isBusy && Accounts.Count > 0;
+    public bool CanExport => !_isBusy && ManagedAccount?.Account.PortableFileCount > 0;
+    public bool CanImport => !_isBusy && !HasBlockingProcesses && ManagedAccount is not null;
+    public bool CanBackupManaged => !_isBusy && !HasBlockingProcesses && ManagedAccount?.Account.PortableFileCount > 0;
+
+    /// <summary>The account the export, import, history, and backup actions apply to.</summary>
+    public AccountCardViewModel? ManagedAccount
+    {
+        get => _managedAccount;
+        set
+        {
+            if (SetProperty(ref _managedAccount, value))
+            {
+                OnPropertyChanged(nameof(CanExport));
+                OnPropertyChanged(nameof(CanImport));
+                OnPropertyChanged(nameof(CanBackupManaged));
+            }
+        }
+    }
 
     /// <summary>
     /// True when a plain migration is about to overwrite an account that has no snapshot of
@@ -399,6 +494,7 @@ internal sealed class MainWindowViewModel : ObservableObject
             // someone act on a pair they never chose.
             var previousSource = SelectedSource?.Account.SteamId64;
             var previousTarget = SelectedTarget?.Account.SteamId64;
+            var previousManaged = ManagedAccount?.Account.SteamId64;
 
             var discovered = _discovery.Discover(SteamDirectory).Select(account => new AccountCardViewModel(account)).ToArray();
             Accounts.Clear();
@@ -413,6 +509,7 @@ internal sealed class MainWindowViewModel : ObservableObject
             SelectedTarget = FindAccount(previousTarget) is { } restoredTarget && !ReferenceEquals(restoredTarget, SelectedSource)
                 ? restoredTarget
                 : Accounts.FirstOrDefault(account => !ReferenceEquals(account, SelectedSource));
+            ManagedAccount = FindAccount(previousManaged) ?? SelectedTarget ?? Accounts.FirstOrDefault();
             EnvironmentStatus = Accounts.Count == 1
                 ? LanguageService.Text("AccountsFoundOne")
                 : LanguageService.Format("AccountsFoundMany", Accounts.Count);
@@ -577,17 +674,12 @@ internal sealed class MainWindowViewModel : ObservableObject
         }
     }
 
-    public async Task BackupTargetAsync()
+    public async Task BackupAccountAsync(AccountCardViewModel account)
     {
-        if (SelectedTarget is null)
-        {
-            return;
-        }
-
         SetBusy(true, "BackingUp");
         try
         {
-            var backup = await _accountBackupService.CreateManualBackupAsync(SelectedTarget.Account, BackupRoot);
+            var backup = await _accountBackupService.CreateManualBackupAsync(account.Account, BackupRoot);
             _latestTargetBackup = backup;
             ActivityTitle = LanguageService.Text("BackupComplete");
             ActivityDetail = LanguageService.Format("BackupCompleteDetail", backup.Account.DisplayName, backup.FileCount);
@@ -633,6 +725,73 @@ internal sealed class MainWindowViewModel : ObservableObject
         catch (MigrationException exception)
         {
             ActivityTitle = LanguageService.Text("MigrationStopped");
+            ActivityDetail = LanguageService.TranslateMigrationError(exception.Message);
+        }
+        finally
+        {
+            SetBusy(false);
+            RefreshBackupState();
+            RefreshSafetyState();
+            RefreshPreview();
+        }
+    }
+
+    public async Task ExportAsync(AccountCardViewModel account, string destinationFile)
+    {
+        SetBusy(true, "Exporting");
+        try
+        {
+            var package = await _packageService.ExportAsync(account.Account, destinationFile);
+            ActivityTitle = LanguageService.Text("ExportComplete");
+            ActivityDetail = LanguageService.Format(
+                "ExportCompleteDetail",
+                package.Entries.Count,
+                Path.GetFileName(destinationFile));
+        }
+        catch (MigrationException exception)
+        {
+            ActivityTitle = LanguageService.Text("ExportStopped");
+            ActivityDetail = LanguageService.TranslateMigrationError(exception.Message);
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
+    /// <summary>Validates a settings file before anything is written.</summary>
+    public ConfigPackage? ReadPackage(string packageFile)
+    {
+        try
+        {
+            return _packageService.Read(packageFile);
+        }
+        catch (MigrationException exception)
+        {
+            ActivityTitle = LanguageService.Text("ImportStopped");
+            ActivityDetail = LanguageService.TranslateMigrationError(exception.Message);
+            return null;
+        }
+    }
+
+    public async Task ImportAsync(AccountCardViewModel account, ConfigPackage package)
+    {
+        SetBusy(true, "Importing");
+        try
+        {
+            var result = await _packageService.ImportAsync(
+                account.Account,
+                package,
+                package.Entries.Select(entry => entry.Name).ToArray(),
+                BackupRoot,
+                CreateProgressReporter());
+            Load(SteamDirectory);
+            ActivityTitle = LanguageService.Text("ImportComplete");
+            ActivityDetail = LanguageService.Format("ImportCompleteDetail", result.FileCount, account.DisplayName);
+        }
+        catch (MigrationException exception)
+        {
+            ActivityTitle = LanguageService.Text("ImportStopped");
             ActivityDetail = LanguageService.TranslateMigrationError(exception.Message);
         }
         finally
@@ -765,6 +924,9 @@ internal sealed class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(CanMigrate));
         OnPropertyChanged(nameof(CanBackupTarget));
         OnPropertyChanged(nameof(CanOpenHistory));
+        OnPropertyChanged(nameof(CanExport));
+        OnPropertyChanged(nameof(CanImport));
+        OnPropertyChanged(nameof(CanBackupManaged));
     }
 
     private void UpdateMigrationButtonText()

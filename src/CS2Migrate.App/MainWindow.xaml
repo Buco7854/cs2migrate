@@ -149,18 +149,16 @@
                                Foreground="{DynamicResource TextOnAccentBrush}"
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
-                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
-                    <!-- Literal: the product name is not translated, and routing it through a
-                         resource lookup left the line blank. -->
-                    <TextBlock Text="CS2 Migrate" FontSize="18" FontWeight="SemiBold"
-                               FontFamily="Segoe UI" Foreground="{DynamicResource TextPrimaryBrush}" />
-                    <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
-                        <TextBlock Text="{DynamicResource Slogan}" FontSize="12" FontFamily="Segoe UI"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBlock Text="{Binding BuildStamp}" FontSize="12" FontFamily="Segoe UI" Margin="8,0,0,0"
-                                   Foreground="{DynamicResource TextTertiaryBrush}" />
-                    </StackPanel>
-                </StackPanel>
+                <!-- One row of siblings. Stacking the product name above this line left it
+                     blank on Windows while every sibling drew normally. -->
+                <TextBlock Text="CS2 Migrate" FontSize="16" FontWeight="SemiBold" Margin="12,0,0,0"
+                           VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <Border Width="1" Height="16" Margin="12,0,12,0" VerticalAlignment="Center"
+                        Background="{DynamicResource DividerBrush}" />
+                <TextBlock Text="{DynamicResource Slogan}" FontSize="12" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBlock Text="{Binding BuildStamp}" FontSize="12" Margin="10,0,0,0" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextTertiaryBrush}" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">

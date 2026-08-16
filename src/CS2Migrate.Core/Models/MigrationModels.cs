@@ -51,6 +51,27 @@ public sealed record AccountBackup(
     DateTimeOffset CreatedUtc,
     int FileCount);
 
+public enum RestorePointKind
+{
+    BeforeMigration,
+    ManualBackup,
+    AutomaticSafetyCopy,
+    BeforeFriendSession
+}
+
+public sealed record RestorePointFile(
+    string Name,
+    MigrationCategory Category,
+    long Length,
+    string Sha256,
+    string ArchivePath);
+
+public sealed record RestorePoint(
+    string ArchiveDirectory,
+    DateTimeOffset CreatedUtc,
+    RestorePointKind Kind,
+    IReadOnlyList<RestorePointFile> Files);
+
 public sealed record TemporarySessionRecovery(
     SteamAccount Target,
     string ArchiveDirectory,

@@ -410,11 +410,11 @@
                             <TextBlock Text="{DynamicResource BackupTarget}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button IsEnabled="{Binding CanRestoreTarget}" Click="RestoreTarget_Click" Margin="0,0,8,0"
-                            ToolTip="{DynamicResource RestoreLatestTip}">
+                    <Button IsEnabled="{Binding CanOpenHistory}" Click="History_Click" Margin="0,0,8,0"
+                            ToolTip="{DynamicResource HistoryTip}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE777;" Style="{StaticResource CommandGlyphStyle}" />
-                            <TextBlock Text="{DynamicResource RestoreLatest}" VerticalAlignment="Center" />
+                            <TextBlock Text="&#xE81C;" Style="{StaticResource CommandGlyphStyle}" />
+                            <TextBlock Text="{DynamicResource History}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                     <Button Click="OpenBackups_Click" Margin="0,0,16,0"

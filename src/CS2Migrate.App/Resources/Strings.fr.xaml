@@ -34,8 +34,30 @@
     <system:String x:Key="OpenBackupsTip">Ouvrir le dossier contenant toutes les sauvegardes créées par l’application</system:String>
     <system:String x:Key="BackupTarget">Sauvegarder</system:String>
     <system:String x:Key="BackupTargetTip">Enregistrer un instantané vérifié des réglages du compte de destination</system:String>
-    <system:String x:Key="RestoreLatest">Restaurer</system:String>
-    <system:String x:Key="RestoreLatestTip">Remettre le compte de destination à son instantané le plus récent</system:String>
+
+    <system:String x:Key="History">Historique</system:String>
+    <system:String x:Key="HistoryTip">Parcourir toutes les versions archivées du compte de destination et en restaurer une</system:String>
+    <system:String x:Key="HistoryWindowTitle">Historique des versions</system:String>
+    <system:String x:Key="HistoryHeader">Historique des versions — {0}</system:String>
+    <system:String x:Key="HistoryLead">Chaque migration, sauvegarde et restauration archive les fichiers qu’elle allait modifier. Choisissez un moment, puis ce qu’il faut restaurer.</system:String>
+    <system:String x:Key="HistoryEmpty">Rien n’a encore été archivé pour ce compte. Une version est enregistrée automatiquement dès la première modification de ses réglages.</system:String>
+    <system:String x:Key="HistoryFilesTitle">Fichiers de cette version</system:String>
+    <system:String x:Key="HistoryFilesDetail">Seuls les fichiers cochés sont réécrits. Le reste n’est pas touché.</system:String>
+    <system:String x:Key="HistoryFooter">Les fichiers remplacés sont archivés au préalable : une restauration peut donc être annulée.</system:String>
+    <system:String x:Key="HistoryOneFile">1 fichier</system:String>
+    <system:String x:Key="HistoryManyFiles">{0} fichiers</system:String>
+    <system:String x:Key="KindBeforeMigration">Avant une migration</system:String>
+    <system:String x:Key="KindManualBackup">Sauvegarde manuelle</system:String>
+    <system:String x:Key="KindSafetyCopy">Copie de sécurité automatique</system:String>
+    <system:String x:Key="KindFriendSession">Avant une session chez un ami</system:String>
+    <system:String x:Key="SelectAll">Tout cocher</system:String>
+    <system:String x:Key="SelectNone">Tout décocher</system:String>
+    <system:String x:Key="RestoreSelected">Restaurer la sélection</system:String>
+    <system:String x:Key="CloseButton">Fermer</system:String>
+    <system:String x:Key="ConfirmHistoryRestoreTitle">Restaurer une version antérieure</system:String>
+    <system:String x:Key="ConfirmHistoryRestoreMessage">Réécrire {0} fichier(s) sur « {1} » tels qu’ils étaient le {2} ?&#10;&#10;Les fichiers remplacés sont archivés au préalable : l’opération peut être annulée depuis cette même fenêtre.</system:String>
+    <system:String x:Key="HistoryRestoreComplete">Version antérieure restaurée</system:String>
+    <system:String x:Key="HistoryRestoreCompleteDetail">{0} fichier(s) réécrits sur {1} et vérifiés.</system:String>
 
     <system:String x:Key="AccountIdentityFallback">ID Steam · {0}</system:String>
     <system:String x:Key="NoPortableFiles">Aucun réglage CS2 portable trouvé</system:String>
@@ -114,15 +136,13 @@
     <system:String x:Key="ConfirmFriendRestoreTitle">Restaurer les réglages d’origine</system:String>
     <system:String x:Key="ConfirmFriendRestoreMessage">Restaurer « {0} » maintenant ? {1} fichier(s) diffèrent de l’original protégé.&#10;&#10;Les réglages temporaires actuels recevront aussi une sauvegarde de sécurité.</system:String>
 
+    <system:String x:Key="OfferBackupTitle">« {0} » n’a aucune sauvegarde</system:String>
+    <system:String x:Key="OfferBackupMessage">« {0} » n’a jamais été sauvegardé depuis cette application.&#10;&#10;Oui — enregistrer d’abord un instantané complet de ses réglages, puis migrer.&#10;Non — migrer maintenant. Les fichiers remplacés restent sauvegardés individuellement.&#10;Annuler — ne rien modifier.</system:String>
     <system:String x:Key="ConfirmBackupTitle">Sauvegarder le compte cible</system:String>
     <system:String x:Key="ConfirmBackupMessage">Créer une sauvegarde vérifiée de tous les réglages portables de « {0} » ?</system:String>
     <system:String x:Key="BackupComplete">Sauvegarde terminée</system:String>
     <system:String x:Key="BackupCompleteDetail">{0} protégé : {1} fichier(s) de réglages vérifié(s).</system:String>
     <system:String x:Key="BackupStopped">Sauvegarde arrêtée sans risque</system:String>
-    <system:String x:Key="ConfirmManualRestoreTitle">Restaurer la dernière sauvegarde</system:String>
-    <system:String x:Key="ConfirmManualRestoreMessage">Restaurer « {0} » depuis la sauvegarde créée le {1} ({2} fichier(s)) ?&#10;&#10;Les réglages actuels seront sauvegardés avant la restauration.</system:String>
-    <system:String x:Key="ManualRestoreComplete">Sauvegarde restaurée</system:String>
-    <system:String x:Key="ManualRestoreCompleteDetail">{0} restauré : {1} fichier(s) copié(s) et vérifié(s).</system:String>
 
     <system:String x:Key="CloudRecoveryTitle">Steam Cloud a modifié {0} fichier(s) migré(s)</system:String>
     <system:String x:Key="CloudRecoveryRunningDetail">Laissez Steam terminer la synchronisation, fermez-le, puis réappliquez la copie locale scellée.</system:String>

@@ -34,8 +34,30 @@
     <system:String x:Key="OpenBackupsTip">Open the folder that stores every backup this app has made</system:String>
     <system:String x:Key="BackupTarget">Back up</system:String>
     <system:String x:Key="BackupTargetTip">Save a verified snapshot of the destination account's settings</system:String>
-    <system:String x:Key="RestoreLatest">Restore</system:String>
-    <system:String x:Key="RestoreLatestTip">Put the destination account back to its newest snapshot</system:String>
+
+    <system:String x:Key="History">History</system:String>
+    <system:String x:Key="HistoryTip">Browse every archived version of the destination account and put any of them back</system:String>
+    <system:String x:Key="HistoryWindowTitle">Version history</system:String>
+    <system:String x:Key="HistoryHeader">Version history — {0}</system:String>
+    <system:String x:Key="HistoryLead">Every migration, backup, and restore archives the files it was about to change. Pick a point in time, then choose what to put back.</system:String>
+    <system:String x:Key="HistoryEmpty">Nothing has been archived for this account yet. A version is saved automatically the first time its settings change.</system:String>
+    <system:String x:Key="HistoryFilesTitle">Files in this version</system:String>
+    <system:String x:Key="HistoryFilesDetail">Only the ticked files are written back. Everything else is left alone.</system:String>
+    <system:String x:Key="HistoryFooter">The files being replaced are archived first, so a restore can itself be undone.</system:String>
+    <system:String x:Key="HistoryOneFile">1 file</system:String>
+    <system:String x:Key="HistoryManyFiles">{0} files</system:String>
+    <system:String x:Key="KindBeforeMigration">Before a migration</system:String>
+    <system:String x:Key="KindManualBackup">Manual backup</system:String>
+    <system:String x:Key="KindSafetyCopy">Automatic safety copy</system:String>
+    <system:String x:Key="KindFriendSession">Before a friend session</system:String>
+    <system:String x:Key="SelectAll">Select all</system:String>
+    <system:String x:Key="SelectNone">Select none</system:String>
+    <system:String x:Key="RestoreSelected">Restore selected files</system:String>
+    <system:String x:Key="CloseButton">Close</system:String>
+    <system:String x:Key="ConfirmHistoryRestoreTitle">Restore an earlier version</system:String>
+    <system:String x:Key="ConfirmHistoryRestoreMessage">Write {0} file(s) back to “{1}” as they were on {2}?&#10;&#10;The files being replaced are archived first, so this can be undone from the same window.</system:String>
+    <system:String x:Key="HistoryRestoreComplete">Earlier version restored</system:String>
+    <system:String x:Key="HistoryRestoreCompleteDetail">{0} file(s) written back to {1} and verified.</system:String>
 
     <system:String x:Key="AccountIdentityFallback">Steam ID · {0}</system:String>
     <system:String x:Key="NoPortableFiles">No portable CS2 settings found</system:String>
@@ -114,15 +136,13 @@
     <system:String x:Key="ConfirmFriendRestoreTitle">Restore friend’s original settings</system:String>
     <system:String x:Key="ConfirmFriendRestoreMessage">Restore “{0}” now? {1} file(s) differ from the protected original.&#10;&#10;The current temporary settings will also receive a safety backup.</system:String>
 
+    <system:String x:Key="OfferBackupTitle">“{0}” has no backup yet</system:String>
+    <system:String x:Key="OfferBackupMessage">“{0}” has never been backed up from this app.&#10;&#10;Yes — save a full snapshot of its settings first, then migrate.&#10;No — migrate now. Replaced files are still backed up individually.&#10;Cancel — change nothing.</system:String>
     <system:String x:Key="ConfirmBackupTitle">Back up target account</system:String>
     <system:String x:Key="ConfirmBackupMessage">Create a verified backup of all portable settings for “{0}”?</system:String>
     <system:String x:Key="BackupComplete">Backup complete</system:String>
     <system:String x:Key="BackupCompleteDetail">Protected {0}: {1} settings file(s) verified.</system:String>
     <system:String x:Key="BackupStopped">Backup stopped safely</system:String>
-    <system:String x:Key="ConfirmManualRestoreTitle">Restore latest backup</system:String>
-    <system:String x:Key="ConfirmManualRestoreMessage">Restore “{0}” from the backup created {1} ({2} file(s))?&#10;&#10;The current settings will be backed up before restoration.</system:String>
-    <system:String x:Key="ManualRestoreComplete">Backup restored</system:String>
-    <system:String x:Key="ManualRestoreCompleteDetail">Restored {0}: {1} settings file(s) copied and verified.</system:String>
 
     <system:String x:Key="CloudRecoveryTitle">Steam Cloud changed {0} migrated file(s)</system:String>
     <system:String x:Key="CloudRecoveryRunningDetail">Let Steam finish syncing, close it, then reapply the sealed local copy.</system:String>

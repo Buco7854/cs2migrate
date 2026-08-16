@@ -63,6 +63,33 @@ public partial class MainWindow : Window
             return;
         }
 
+        // The engine always backs up the files it replaces, but an account that has never
+        // been snapshotted has nothing to fall back to for the rest of its configuration.
+        if (_viewModel.ShouldOfferTargetBackup)
+        {
+            var targetName = _viewModel.SelectedTarget!.DisplayName;
+            var answer = MessageBox.Show(
+                this,
+                LanguageService.Format("OfferBackupMessage", targetName),
+                LanguageService.Format("OfferBackupTitle", targetName),
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Warning);
+
+            if (answer == MessageBoxResult.Cancel)
+            {
+                return;
+            }
+
+            if (answer == MessageBoxResult.Yes)
+            {
+                await _viewModel.BackupTargetAsync();
+                if (!_viewModel.CanMigrate)
+                {
+                    return;
+                }
+            }
+        }
+
         await _viewModel.MigrateAsync();
     }
 
@@ -83,19 +110,24 @@ public partial class MainWindow : Window
         await _viewModel.BackupTargetAsync();
     }
 
-    private async void RestoreTarget_Click(object sender, RoutedEventArgs e)
+    private void OpenBackups_Click(object sender, RoutedEventArgs e) => _viewModel.OpenBackups();
+
+    private async void History_Click(object sender, RoutedEventArgs e)
     {
-        var details = _viewModel.CreateManualRestoreConfirmation();
-        if (details is null ||
-            MessageBox.Show(this, details.Value.Message, details.Value.Title, MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
+        var account = _viewModel.SelectedTarget;
+        if (account is null)
         {
             return;
         }
 
-        await _viewModel.RestoreTargetAsync();
-    }
+        var dialog = new HistoryWindow(account.DisplayName, _viewModel.LoadRestorePoints()) { Owner = this };
+        if (dialog.ShowDialog() != true || dialog.ChosenPoint is null)
+        {
+            return;
+        }
 
-    private void OpenBackups_Click(object sender, RoutedEventArgs e) => _viewModel.OpenBackups();
+        await _viewModel.RestoreFromHistoryAsync(dialog.ChosenPoint, dialog.ChosenFileNames);
+    }
 }
 
 internal sealed class MainWindowViewModel : ObservableObject
@@ -104,6 +136,7 @@ internal sealed class MainWindowViewModel : ObservableObject
     private readonly IProcessInspector _processInspector = new ProcessInspector();
     private readonly MigrationEngine _migrationEngine;
     private readonly CloudRecoveryService _cloudRecoveryService = new();
+    private readonly RestorePointService _restorePointService;
     private readonly AccountBackupService _accountBackupService;
     private AccountCardViewModel? _selectedSource;
     private AccountCardViewModel? _selectedTarget;
@@ -134,6 +167,7 @@ internal sealed class MainWindowViewModel : ObservableObject
     {
         _migrationEngine = new MigrationEngine(_processInspector);
         _accountBackupService = new AccountBackupService(_processInspector);
+        _restorePointService = new RestorePointService(_processInspector);
         ResetLocalizedDefaults();
     }
 
@@ -230,7 +264,6 @@ internal sealed class MainWindowViewModel : ObservableObject
             {
                 OnPropertyChanged(nameof(CanMigrate));
                 OnPropertyChanged(nameof(CanBackupTarget));
-                OnPropertyChanged(nameof(CanRestoreTarget));
             }
         }
     }
@@ -245,7 +278,17 @@ internal sealed class MainWindowViewModel : ObservableObject
     public bool CanMigrate => !_isBusy && !HasBlockingProcesses &&
                               (HasPendingTemporarySession || HasPendingRecovery || GetPreview()?.Files.Count > 0);
     public bool CanBackupTarget => !_isBusy && !HasBlockingProcesses && SelectedTarget?.Account.PortableFileCount > 0;
-    public bool CanRestoreTarget => !_isBusy && !HasBlockingProcesses && _latestTargetBackup is not null;
+    public bool CanOpenHistory => !_isBusy && SelectedTarget is not null;
+
+    /// <summary>
+    /// True when a plain migration is about to overwrite an account that has no snapshot of
+    /// its own yet, so the user can be offered one before anything is written.
+    /// </summary>
+    public bool ShouldOfferTargetBackup =>
+        _latestTargetBackup is null &&
+        _pendingRecovery is null &&
+        _pendingTemporarySession is null &&
+        SelectedTarget?.Account.PortableFileCount > 0;
 
     private string BackupRoot => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -314,22 +357,6 @@ internal sealed class MainWindowViewModel : ObservableObject
             LanguageService.Text(IsTemporarySession ? "ConfirmFriendSessionTitle" : "ConfirmMigrationTitle"));
     }
 
-    public (string Message, string Title)? CreateManualRestoreConfirmation()
-    {
-        if (_latestTargetBackup is null)
-        {
-            return null;
-        }
-
-        return (
-            LanguageService.Format(
-                "ConfirmManualRestoreMessage",
-                _latestTargetBackup.Account.DisplayName,
-                _latestTargetBackup.CreatedUtc.LocalDateTime.ToString("g", LanguageService.Culture),
-                _latestTargetBackup.FileCount),
-            LanguageService.Text("ConfirmManualRestoreTitle"));
-    }
-
     public void Load(string? requestedSteamDirectory = null)
     {
         try
@@ -357,6 +384,12 @@ internal sealed class MainWindowViewModel : ObservableObject
             {
                 TryWriteSteamPathPreference(SteamDirectory);
             }
+            // Reloading rebuilds the account view models, so remember which accounts were
+            // picked. Silently moving the selection after a migration or a restore would let
+            // someone act on a pair they never chose.
+            var previousSource = SelectedSource?.Account.SteamId64;
+            var previousTarget = SelectedTarget?.Account.SteamId64;
+
             var discovered = _discovery.Discover(SteamDirectory).Select(account => new AccountCardViewModel(account)).ToArray();
             Accounts.Clear();
             foreach (var account in discovered)
@@ -364,8 +397,12 @@ internal sealed class MainWindowViewModel : ObservableObject
                 Accounts.Add(account);
             }
 
-            SelectedSource = Accounts.FirstOrDefault(account => account.Account.PortableFileCount > 0) ?? Accounts.FirstOrDefault();
-            SelectedTarget = Accounts.FirstOrDefault(account => !ReferenceEquals(account, SelectedSource));
+            SelectedSource = FindAccount(previousSource)
+                ?? Accounts.FirstOrDefault(account => account.Account.PortableFileCount > 0)
+                ?? Accounts.FirstOrDefault();
+            SelectedTarget = FindAccount(previousTarget) is { } restoredTarget && !ReferenceEquals(restoredTarget, SelectedSource)
+                ? restoredTarget
+                : Accounts.FirstOrDefault(account => !ReferenceEquals(account, SelectedSource));
             EnvironmentStatus = Accounts.Count == 1
                 ? LanguageService.Text("AccountsFoundOne")
                 : LanguageService.Format("AccountsFoundMany", Accounts.Count);
@@ -392,6 +429,10 @@ internal sealed class MainWindowViewModel : ObservableObject
             RefreshPreview();
         }
     }
+
+    private AccountCardViewModel? FindAccount(ulong? steamId) => steamId is null
+        ? null
+        : Accounts.FirstOrDefault(account => account.Account.SteamId64 == steamId);
 
     public void SwapAccounts()
     {
@@ -565,10 +606,15 @@ internal sealed class MainWindowViewModel : ObservableObject
         }
     }
 
-    public async Task RestoreTargetAsync()
+    /// <summary>Every archived version of the destination account, newest first.</summary>
+    public IReadOnlyList<RestorePoint> LoadRestorePoints() => SelectedTarget is null
+        ? []
+        : _restorePointService.FindRestorePoints(SelectedTarget.Account, BackupRoot);
+
+    public async Task RestoreFromHistoryAsync(RestorePoint restorePoint, IReadOnlyList<string> fileNames)
     {
-        var backup = _latestTargetBackup;
-        if (backup is null)
+        var account = SelectedTarget;
+        if (account is null)
         {
             return;
         }
@@ -576,13 +622,18 @@ internal sealed class MainWindowViewModel : ObservableObject
         SetBusy(true, "Restoring");
         try
         {
-            var result = await _accountBackupService.RestoreManualBackupAsync(
-                backup,
+            var result = await _restorePointService.RestoreAsync(
+                account.Account,
+                restorePoint,
+                fileNames,
                 BackupRoot,
                 CreateProgressReporter());
             Load(SteamDirectory);
-            ActivityTitle = LanguageService.Text("ManualRestoreComplete");
-            ActivityDetail = LanguageService.Format("ManualRestoreCompleteDetail", backup.Account.DisplayName, result.FileCount);
+            ActivityTitle = LanguageService.Text("HistoryRestoreComplete");
+            ActivityDetail = LanguageService.Format(
+                "HistoryRestoreCompleteDetail",
+                result.FileCount,
+                account.DisplayName);
         }
         catch (MigrationException exception)
         {
@@ -746,7 +797,7 @@ internal sealed class MainWindowViewModel : ObservableObject
         UpdateMigrationButtonText();
         OnPropertyChanged(nameof(CanMigrate));
         OnPropertyChanged(nameof(CanBackupTarget));
-        OnPropertyChanged(nameof(CanRestoreTarget));
+        OnPropertyChanged(nameof(CanOpenHistory));
     }
 
     private void UpdateMigrationButtonText()
@@ -788,8 +839,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
         if (!string.Equals(previousManualArchive, _latestTargetBackup?.ArchiveDirectory, StringComparison.Ordinal))
         {
-            OnPropertyChanged(nameof(CanRestoreTarget));
-        }
+            }
 
         if (_pendingTemporarySession is not null)
         {
@@ -807,7 +857,6 @@ internal sealed class MainWindowViewModel : ObservableObject
         UpdateMigrationButtonText();
         OnPropertyChanged(nameof(CanMigrate));
         OnPropertyChanged(nameof(CanBackupTarget));
-        OnPropertyChanged(nameof(CanRestoreTarget));
     }
 
     private void ClearBackupState()
@@ -819,7 +868,6 @@ internal sealed class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(HasPendingTemporarySession));
         OnPropertyChanged(nameof(CanMigrate));
         OnPropertyChanged(nameof(CanBackupTarget));
-        OnPropertyChanged(nameof(CanRestoreTarget));
         UpdateMigrationButtonText();
     }
 

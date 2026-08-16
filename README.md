@@ -22,7 +22,7 @@
 CS2 Migrate is a Windows desktop app that copies Counter-Strike 2 settings from one local Steam account to another. It finds Steam and its accounts by itself, lists every file it is about to write, backs up whatever it replaces, and ships as a single self-contained executable.
 
 - **No setup.** No installer, no Steam Web API key, no administrator rights, no need to know where CS2 keeps its config.
-- **Reversible.** Every replaced file is backed up, and a sealed copy of the migration is kept in case Steam Cloud overwrites it later.
+- **Reversible.** Every operation archives the files it is about to change, and the **History** window can put any of those versions back, file by file.
 - **Native.** A WPF interface built on the Windows 11 design language: it follows your system light/dark setting and your accent colour.
 - **Bilingual.** English and French, detected from Windows (or your browser, on the site) and overridable.
 

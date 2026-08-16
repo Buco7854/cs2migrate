@@ -19,6 +19,14 @@ internal static class ThemeService
     private const int UseImmersiveDarkMode = 20;
     private const int UseImmersiveDarkModeBefore20H1 = 19;
 
+    // Windows 11 22000+ lets the caption be painted outright, which is more dependable than
+    // the dark-mode flag alone.
+    private const int BorderColorAttribute = 34;
+    private const int CaptionColorAttribute = 35;
+    private const int CaptionTextColorAttribute = 36;
+
+    private const uint FrameChangedFlags = 0x0001 | 0x0002 | 0x0004 | 0x0020; // NOSIZE|NOMOVE|NOZORDER|FRAMECHANGED
+
     private static readonly Uri LightTheme = new("Resources/Theme.Light.xaml", UriKind.Relative);
     private static readonly Uri DarkTheme = new("Resources/Theme.Dark.xaml", UriKind.Relative);
 
@@ -26,6 +34,10 @@ internal static class ThemeService
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr window, int attribute, ref int value, int size);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetWindowPos(IntPtr window, IntPtr insertAfter, int x, int y, int cx, int cy, uint flags);
 
     public static void Initialize()
     {
@@ -49,6 +61,16 @@ internal static class ThemeService
             if (sender is Window initialized)
             {
                 ApplyTitleBar(initialized);
+            }
+        };
+
+        // Some Windows builds ignore the attribute until the frame has been created, so set
+        // it again once the window is up.
+        window.Loaded += (sender, _) =>
+        {
+            if (sender is Window loaded)
+            {
+                ApplyTitleBar(loaded);
             }
         };
     }
@@ -78,6 +100,29 @@ internal static class ThemeService
         {
             _ = DwmSetWindowAttribute(handle, UseImmersiveDarkModeBefore20H1, ref useDarkTitleBar, sizeof(int));
         }
+
+        // Paint the caption with the same colours as the page. Ignored before Windows 11,
+        // where the dark-mode flag above is what takes effect.
+        var caption = ColorRef("LayerBackgroundBrush", _isLight ? "#F3F3F3" : "#202020");
+        var captionText = ColorRef("TextPrimaryBrush", _isLight ? "#1B1B1B" : "#FFFFFF");
+        var border = ColorRef("CardStrokeBrush", _isLight ? "#E5E5E5" : "#1F1F1F");
+        _ = DwmSetWindowAttribute(handle, CaptionColorAttribute, ref caption, sizeof(int));
+        _ = DwmSetWindowAttribute(handle, CaptionTextColorAttribute, ref captionText, sizeof(int));
+        _ = DwmSetWindowAttribute(handle, BorderColorAttribute, ref border, sizeof(int));
+
+        if (window.IsVisible)
+        {
+            _ = SetWindowPos(handle, IntPtr.Zero, 0, 0, 0, 0, FrameChangedFlags);
+        }
+    }
+
+    /// <summary>Packs a themed brush into the COLORREF (0x00BBGGRR) that DWM expects.</summary>
+    private static int ColorRef(string brushKey, string fallback)
+    {
+        var color = Application.Current.TryFindResource(brushKey) is SolidColorBrush brush
+            ? brush.Color
+            : (Color)ColorConverter.ConvertFromString(fallback);
+        return color.R | (color.G << 8) | (color.B << 16);
     }
 
     private static void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)

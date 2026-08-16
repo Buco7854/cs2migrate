@@ -367,7 +367,7 @@ public sealed class AccountBackupService(IProcessInspector? processInspector = n
         }
     }
 
-    private static BackupManifest? TryLoadCompletedManifest(string archiveDirectory)
+    internal static BackupManifest? TryLoadCompletedManifest(string archiveDirectory)
     {
         var manifestPath = Path.Combine(archiveDirectory, "manifest.json");
         if (!File.Exists(manifestPath) || !File.Exists(Path.Combine(archiveDirectory, "completed.txt")))

@@ -22,13 +22,14 @@ public sealed class RestorePointServiceTests
 
         var points = new RestorePointService(inspector).FindRestorePoints(target, backupRoot);
 
-        Assert.AreEqual(2, points.Count);
-        Assert.AreEqual(RestorePointKind.BeforeMigration, points[0].Kind);
-        Assert.AreEqual(RestorePointKind.ManualBackup, points[1].Kind);
-        Assert.IsTrue(points[0].CreatedUtc >= points[1].CreatedUtc);
+        Assert.AreEqual(3, points.Count);
+        Assert.AreEqual(RestorePointKind.AppliedByMigration, points[0].Kind);
+        Assert.AreEqual(RestorePointKind.BeforeMigration, points[1].Kind);
+        Assert.AreEqual(RestorePointKind.ManualBackup, points[2].Kind);
+        Assert.IsTrue(points[1].CreatedUtc >= points[2].CreatedUtc);
         CollectionAssert.AreEqual(
             new[] { "cs2_user_keys_0_slot0.vcfg" },
-            points[0].Files.Select(file => file.Name).ToArray());
+            points[1].Files.Select(file => file.Name).ToArray());
     }
 
     [TestMethod]
@@ -45,9 +46,16 @@ public sealed class RestorePointServiceTests
         await new MigrationEngine(inspector).MigrateAsync(
             new MigrationRequest(source, target, MigrationCategory.Keybinds, backupRoot));
 
-        var point = new RestorePointService(inspector).FindRestorePoints(target, backupRoot).Single();
+        var points = new RestorePointService(inspector).FindRestorePoints(target, backupRoot);
 
-        Assert.AreEqual("original binds", File.ReadAllText(point.Files.Single().ArchivePath));
+        Assert.AreEqual(
+            "source binds",
+            File.ReadAllText(points.Single(p => p.Kind == RestorePointKind.AppliedByMigration).Files.Single().ArchivePath),
+            "the version the migration wrote");
+        Assert.AreEqual(
+            "original binds",
+            File.ReadAllText(points.Single(p => p.Kind == RestorePointKind.BeforeMigration).Files.Single().ArchivePath),
+            "the version it replaced");
     }
 
     [TestMethod]
@@ -67,7 +75,8 @@ public sealed class RestorePointServiceTests
             new MigrationRequest(source, target, MigrationCategory.AllPortable, backupRoot));
 
         var service = new RestorePointService(inspector);
-        var point = service.FindRestorePoints(target, backupRoot).Single();
+        var point = service.FindRestorePoints(target, backupRoot)
+            .Single(candidate => candidate.Kind == RestorePointKind.BeforeMigration);
         var result = await service.RestoreAsync(target, point, ["cs2_user_keys_0_slot0.vcfg"], backupRoot);
 
         Assert.AreEqual(1, result.FileCount);
@@ -99,12 +108,17 @@ public sealed class RestorePointServiceTests
             new MigrationRequest(source, target, MigrationCategory.Keybinds, backupRoot));
 
         var service = new RestorePointService(inspector);
-        var point = service.FindRestorePoints(target, backupRoot).Single();
+        var point = service.FindRestorePoints(target, backupRoot)
+            .Single(candidate => candidate.Kind == RestorePointKind.BeforeMigration);
         await service.RestoreAsync(target, point, ["cs2_user_keys_0_slot0.vcfg"], backupRoot);
 
         var points = service.FindRestorePoints(target, backupRoot);
-        Assert.AreEqual(2, points.Count);
-        Assert.AreEqual("source binds", File.ReadAllText(points[0].Files.Single().ArchivePath));
+        Assert.AreEqual(4, points.Count, "the restore adds its own before/after pair");
+        Assert.AreEqual(RestorePointKind.AppliedByMigration, points[0].Kind);
+        Assert.AreEqual(
+            "source binds",
+            File.ReadAllText(points[1].Files.Single().ArchivePath),
+            "the settings that were live before the restore are recoverable");
     }
 
     [TestMethod]
@@ -121,7 +135,8 @@ public sealed class RestorePointServiceTests
             new MigrationRequest(source, target, MigrationCategory.Keybinds, backupRoot));
 
         var service = new RestorePointService(new FakeProcessInspector("Steam"));
-        var point = service.FindRestorePoints(target, backupRoot).Single();
+        var point = service.FindRestorePoints(target, backupRoot)
+            .Single(candidate => candidate.Kind == RestorePointKind.BeforeMigration);
 
         var failure = await Assert.ThrowsExactlyAsync<MigrationException>(() =>
             service.RestoreAsync(target, point, ["cs2_user_keys_0_slot0.vcfg"], backupRoot));
@@ -145,7 +160,10 @@ public sealed class RestorePointServiceTests
 
         var points = new RestorePointService(new FakeProcessInspector()).FindRestorePoints(target, backupRoot);
 
-        Assert.AreEqual(0, points.Count, "a file that did not exist before has no earlier version to offer");
+        Assert.AreEqual(0, points.Count(point => point.Kind == RestorePointKind.BeforeMigration),
+            "a file that did not exist before has no earlier version to offer");
+        Assert.AreEqual(1, points.Count(point => point.Kind == RestorePointKind.AppliedByMigration),
+            "the version the migration wrote is still restorable");
     }
 
     [TestMethod]

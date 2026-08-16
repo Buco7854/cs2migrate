@@ -154,8 +154,12 @@
                          resource lookup left the line blank. -->
                     <TextBlock Text="CS2 Migrate" FontSize="18" FontWeight="SemiBold"
                                FontFamily="Segoe UI" Foreground="{DynamicResource TextPrimaryBrush}" />
-                    <TextBlock Text="{DynamicResource Slogan}" FontSize="12" FontFamily="Segoe UI"
-                               Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,1,0,0" />
+                    <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
+                        <TextBlock Text="{DynamicResource Slogan}" FontSize="12" FontFamily="Segoe UI"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Text="{Binding BuildStamp}" FontSize="12" FontFamily="Segoe UI" Margin="8,0,0,0"
+                                   Foreground="{DynamicResource TextTertiaryBrush}" />
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
 

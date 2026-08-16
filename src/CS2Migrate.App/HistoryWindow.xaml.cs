@@ -12,13 +12,19 @@ public partial class HistoryWindow : Window
 {
     private readonly HistoryViewModel _viewModel;
 
-    internal HistoryWindow(string accountName, IReadOnlyList<RestorePoint> restorePoints)
+    internal HistoryWindow(
+        IReadOnlyList<AccountCardViewModel> accounts,
+        AccountCardViewModel? initialAccount,
+        Func<AccountCardViewModel, IReadOnlyList<RestorePoint>> loadRestorePoints)
     {
         InitializeComponent();
-        _viewModel = new HistoryViewModel(accountName, restorePoints);
+        _viewModel = new HistoryViewModel(accounts, initialAccount, loadRestorePoints);
         DataContext = _viewModel;
         ThemeService.RegisterWindow(this);
     }
+
+    /// <summary>The account the restore applies to, set only when the dialog was confirmed.</summary>
+    internal AccountCardViewModel? ChosenAccount { get; private set; }
 
     /// <summary>The point the user confirmed, or null when the dialog was dismissed.</summary>
     internal RestorePoint? ChosenPoint { get; private set; }
@@ -34,7 +40,8 @@ public partial class HistoryWindow : Window
     private void Restore_Click(object sender, RoutedEventArgs e)
     {
         var point = _viewModel.SelectedPoint;
-        if (point is null)
+        var account = _viewModel.SelectedAccount;
+        if (point is null || account is null)
         {
             return;
         }
@@ -50,7 +57,8 @@ public partial class HistoryWindow : Window
                 LanguageService.Format(
                     "ConfirmHistoryRestoreMessage",
                     names.Length,
-                    _viewModel.AccountName,
+                    account.DisplayName,
+                    point.Title,
                     point.Timestamp),
                 LanguageService.Text("ConfirmHistoryRestoreTitle"),
                 MessageBoxButton.OKCancel,
@@ -59,6 +67,7 @@ public partial class HistoryWindow : Window
             return;
         }
 
+        ChosenAccount = account;
         ChosenPoint = point.Point;
         ChosenFileNames = names;
         DialogResult = true;
@@ -67,20 +76,49 @@ public partial class HistoryWindow : Window
 
 internal sealed class HistoryViewModel : ObservableObject
 {
+    private readonly Func<AccountCardViewModel, IReadOnlyList<RestorePoint>> _loadRestorePoints;
     private RestorePointViewModel? _selectedPoint;
+    private AccountCardViewModel? _selectedAccount;
 
-    public HistoryViewModel(string accountName, IReadOnlyList<RestorePoint> restorePoints)
+    public HistoryViewModel(
+        IReadOnlyList<AccountCardViewModel> accounts,
+        AccountCardViewModel? initialAccount,
+        Func<AccountCardViewModel, IReadOnlyList<RestorePoint>> loadRestorePoints)
     {
-        AccountName = accountName;
-        RestorePoints = new ObservableCollection<RestorePointViewModel>(
-            restorePoints.Select(point => new RestorePointViewModel(point)));
-        SelectedPoint = RestorePoints.FirstOrDefault();
+        _loadRestorePoints = loadRestorePoints;
+        Accounts = new ObservableCollection<AccountCardViewModel>(accounts);
+        RestorePoints = [];
+        SelectedAccount = initialAccount ?? Accounts.FirstOrDefault();
     }
 
-    public string AccountName { get; }
+    public ObservableCollection<AccountCardViewModel> Accounts { get; }
     public ObservableCollection<RestorePointViewModel> RestorePoints { get; }
-    public string HeaderTitle => LanguageService.Format("HistoryHeader", AccountName);
     public bool IsEmpty => RestorePoints.Count == 0;
+
+    /// <summary>Any account can be inspected, not just the one selected for a migration.</summary>
+    public AccountCardViewModel? SelectedAccount
+    {
+        get => _selectedAccount;
+        set
+        {
+            if (!SetProperty(ref _selectedAccount, value))
+            {
+                return;
+            }
+
+            RestorePoints.Clear();
+            if (value is not null)
+            {
+                foreach (var point in _loadRestorePoints(value))
+                {
+                    RestorePoints.Add(new RestorePointViewModel(point));
+                }
+            }
+
+            SelectedPoint = RestorePoints.FirstOrDefault();
+            OnPropertyChanged(nameof(IsEmpty));
+        }
+    }
 
     public RestorePointViewModel? SelectedPoint
     {
@@ -152,6 +190,7 @@ internal sealed class RestorePointViewModel
         RestorePointKind.ManualBackup => "KindManualBackup",
         RestorePointKind.AutomaticSafetyCopy => "KindSafetyCopy",
         RestorePointKind.BeforeFriendSession => "KindFriendSession",
+        RestorePointKind.AppliedByMigration => "KindAppliedByMigration",
         _ => "KindBeforeMigration"
     });
 

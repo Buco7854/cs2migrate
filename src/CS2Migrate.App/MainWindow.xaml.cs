@@ -114,19 +114,20 @@ public partial class MainWindow : Window
 
     private async void History_Click(object sender, RoutedEventArgs e)
     {
-        var account = _viewModel.SelectedTarget;
-        if (account is null)
+        var dialog = new HistoryWindow(
+            [.. _viewModel.Accounts],
+            _viewModel.SelectedTarget,
+            _viewModel.LoadRestorePoints)
+        {
+            Owner = this
+        };
+
+        if (dialog.ShowDialog() != true || dialog.ChosenPoint is null || dialog.ChosenAccount is null)
         {
             return;
         }
 
-        var dialog = new HistoryWindow(account.DisplayName, _viewModel.LoadRestorePoints()) { Owner = this };
-        if (dialog.ShowDialog() != true || dialog.ChosenPoint is null)
-        {
-            return;
-        }
-
-        await _viewModel.RestoreFromHistoryAsync(dialog.ChosenPoint, dialog.ChosenFileNames);
+        await _viewModel.RestoreFromHistoryAsync(dialog.ChosenAccount, dialog.ChosenPoint, dialog.ChosenFileNames);
     }
 }
 
@@ -172,6 +173,9 @@ internal sealed class MainWindowViewModel : ObservableObject
     }
 
     public ObservableCollection<AccountCardViewModel> Accounts { get; } = [];
+
+    /// <summary>Version and the date of the running executable, so a stale download shows up.</summary>
+    public string BuildStamp { get; } = CreateBuildStamp();
     public ObservableCollection<PreviewFileViewModel> PreviewFiles { get; } = [];
     public bool IsLoaded { get; set; }
     public string LanguageButtonLabel => LanguageService.Current == AppLanguage.English ? "FR" : "EN";
@@ -276,9 +280,9 @@ internal sealed class MainWindowViewModel : ObservableObject
     public string ActivityDetail { get => _activityDetail; private set => SetProperty(ref _activityDetail, value); }
     public string MigrationButtonText { get => _migrationButtonText; private set => SetProperty(ref _migrationButtonText, value); }
     public bool CanMigrate => !_isBusy && !HasBlockingProcesses &&
-                              (HasPendingTemporarySession || HasPendingRecovery || GetPreview()?.Files.Count > 0);
+                              (HasPendingTemporarySession || GetPreview()?.Files.Count > 0);
     public bool CanBackupTarget => !_isBusy && !HasBlockingProcesses && SelectedTarget?.Account.PortableFileCount > 0;
-    public bool CanOpenHistory => !_isBusy && SelectedTarget is not null;
+    public bool CanOpenHistory => !_isBusy && Accounts.Count > 0;
 
     /// <summary>
     /// True when a plain migration is about to overwrite an account that has no snapshot of
@@ -330,16 +334,6 @@ internal sealed class MainWindowViewModel : ObservableObject
                     _pendingTemporarySession.Target.DisplayName,
                     _pendingTemporarySession.ChangedFileCount),
                 LanguageService.Text("ConfirmFriendRestoreTitle"));
-        }
-
-        if (_pendingRecovery is not null)
-        {
-            return (
-                LanguageService.Format(
-                    "ConfirmRecoveryMessage",
-                    _pendingRecovery.ChangedFileCount,
-                    _pendingRecovery.Target.DisplayName),
-                LanguageService.Text("ConfirmRecoveryTitle"));
         }
 
         var preview = GetPreview();
@@ -504,10 +498,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 
     public async Task MigrateAsync()
     {
-        var cloudRecovery = _pendingRecovery;
         var temporaryRecovery = _pendingTemporarySession;
-        var startingFriendSession = temporaryRecovery is null && cloudRecovery is null && IsTemporarySession;
-        SetBusy(true, temporaryRecovery is null && cloudRecovery is null ? "Migrating" : "Reapplying");
+        var startingFriendSession = temporaryRecovery is null && IsTemporarySession;
+        SetBusy(true, "Migrating");
         try
         {
             var progress = CreateProgressReporter();
@@ -521,19 +514,14 @@ internal sealed class MainWindowViewModel : ObservableObject
             }
             else
             {
-                var request = cloudRecovery is null
-                    ? BuildRequest() with
+                result = await _migrationEngine.MigrateAsync(
+                    BuildRequest() with
                     {
                         Purpose = startingFriendSession
                             ? MigrationPurpose.TemporaryFriendSession
                             : MigrationPurpose.Standard
-                    }
-                    : new MigrationRequest(
-                        cloudRecovery.SnapshotSource,
-                        cloudRecovery.Target,
-                        MigrationCategory.AllPortable,
-                        BackupRoot);
-                result = await _migrationEngine.MigrateAsync(request, progress);
+                    },
+                    progress);
             }
 
             Load(SteamDirectory);
@@ -541,11 +529,6 @@ internal sealed class MainWindowViewModel : ObservableObject
             {
                 ActivityTitle = LanguageService.Text("FriendRestoreComplete");
                 ActivityDetail = LanguageService.Format("FriendRestoreCompleteDetail", temporaryRecovery.Target.DisplayName);
-            }
-            else if (cloudRecovery is not null)
-            {
-                ActivityTitle = LanguageService.Text("RecoveryComplete");
-                ActivityDetail = LanguageService.Format("RecoveryCompleteDetail", result.FileCount);
             }
             else if (startingFriendSession)
             {
@@ -606,19 +589,15 @@ internal sealed class MainWindowViewModel : ObservableObject
         }
     }
 
-    /// <summary>Every archived version of the destination account, newest first.</summary>
-    public IReadOnlyList<RestorePoint> LoadRestorePoints() => SelectedTarget is null
-        ? []
-        : _restorePointService.FindRestorePoints(SelectedTarget.Account, BackupRoot);
+    /// <summary>Every archived version of an account, newest first.</summary>
+    public IReadOnlyList<RestorePoint> LoadRestorePoints(AccountCardViewModel account) =>
+        _restorePointService.FindRestorePoints(account.Account, BackupRoot);
 
-    public async Task RestoreFromHistoryAsync(RestorePoint restorePoint, IReadOnlyList<string> fileNames)
+    public async Task RestoreFromHistoryAsync(
+        AccountCardViewModel account,
+        RestorePoint restorePoint,
+        IReadOnlyList<string> fileNames)
     {
-        var account = SelectedTarget;
-        if (account is null)
-        {
-            return;
-        }
-
         SetBusy(true, "Restoring");
         try
         {
@@ -684,18 +663,6 @@ internal sealed class MainWindowViewModel : ObservableObject
             return;
         }
 
-        if (_pendingRecovery is not null)
-        {
-            SafetyTitle = LanguageService.Format("CloudRecoveryTitle", _pendingRecovery.ChangedFileCount);
-            SafetyDetail = HasBlockingProcesses
-                ? LanguageService.Text("CloudRecoveryRunningDetail")
-                : LanguageService.Text("CloudRecoveryReadyDetail");
-            SafetySeverity = StatusSeverity.Informational;
-            UpdateMigrationButtonText();
-            OnPropertyChanged(nameof(CanMigrate));
-            return;
-        }
-
         if (HasBlockingProcesses)
         {
             SafetyTitle = LanguageService.Format(
@@ -730,22 +697,6 @@ internal sealed class MainWindowViewModel : ObservableObject
                 _pendingTemporarySession.Target.DisplayName,
                 _pendingTemporarySession.ChangedFileCount);
             PreviewSize = LanguageService.Text("ProtectedBackup");
-            OnPropertyChanged(nameof(CanMigrate));
-            return;
-        }
-
-        if (_pendingRecovery is not null)
-        {
-            var recoveryFiles = ConfigCatalog.FindFiles(
-                _pendingRecovery.SnapshotSource.ConfigDirectory,
-                MigrationCategory.AllPortable);
-            foreach (var file in recoveryFiles)
-            {
-                PreviewFiles.Add(new PreviewFileViewModel(file.Name, LanguageService.Text("ReplaceAction")));
-            }
-
-            PreviewSummary = LanguageService.Format("CloudRecoveryTitle", _pendingRecovery.ChangedFileCount);
-            PreviewSize = FormatBytes(recoveryFiles.Sum(file => file.Length));
             OnPropertyChanged(nameof(CanMigrate));
             return;
         }
@@ -805,11 +756,7 @@ internal sealed class MainWindowViewModel : ObservableObject
         MigrationButtonText = _isBusy
             ? LanguageService.Text(_busyLabelKey ?? "Migrating")
             : LanguageService.Text(
-                _pendingTemporarySession is not null
-                    ? "RestoreFriendSettings"
-                    : _pendingRecovery is not null
-                        ? "ReapplySettings"
-                        : "MigrateSettings");
+                _pendingTemporarySession is not null ? "RestoreFriendSettings" : "MigrateSettings");
     }
 
     private void RefreshBackupState()
@@ -848,10 +795,8 @@ internal sealed class MainWindowViewModel : ObservableObject
         }
         else if (_pendingRecovery is not null)
         {
-            ActivityTitle = LanguageService.Format("CloudRecoveryTitle", _pendingRecovery.ChangedFileCount);
-            ActivityDetail = _processInspector.GetBlockingProcesses().Count > 0
-                ? LanguageService.Text("CloudRecoveryRunningDetail")
-                : LanguageService.Text("CloudRecoveryReadyDetail");
+            ActivityTitle = LanguageService.Format("SettingsChangedTitle", _pendingRecovery.ChangedFileCount);
+            ActivityDetail = LanguageService.Text("SettingsChangedDetail");
         }
 
         UpdateMigrationButtonText();
@@ -907,6 +852,25 @@ internal sealed class MainWindowViewModel : ObservableObject
         {
             // Automatic discovery will still run on the next launch.
         }
+    }
+
+    private static string CreateBuildStamp()
+    {
+        var version = typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
+        try
+        {
+            var path = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            {
+                return $"v{version} · {File.GetLastWriteTime(path).ToString("g", LanguageService.Culture)}";
+            }
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // The version alone is still enough to identify the build.
+        }
+
+        return $"v{version}";
     }
 
     private static string FormatBytes(long bytes) => bytes switch

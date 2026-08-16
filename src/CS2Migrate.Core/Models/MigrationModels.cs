@@ -54,6 +54,7 @@ public sealed record AccountBackup(
 public enum RestorePointKind
 {
     BeforeMigration,
+    AppliedByMigration,
     ManualBackup,
     AutomaticSafetyCopy,
     BeforeFriendSession

@@ -5,6 +5,23 @@
         MinWidth="720" MinHeight="480" WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
     <Window.Resources>
+        <DataTemplate x:Key="HistoryAccountTemplate">
+            <Grid MinWidth="200">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Ellipse Width="24" Height="24" VerticalAlignment="Center">
+                    <Ellipse.Fill>
+                        <ImageBrush ImageSource="{Binding Avatar}" Stretch="UniformToFill" />
+                    </Ellipse.Fill>
+                </Ellipse>
+                <TextBlock Grid.Column="1" Text="{Binding DisplayName}" Margin="10,0,0,0" FontSize="14"
+                           Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </DataTemplate>
+
         <DataTemplate x:Key="RestorePointTemplate">
             <StackPanel>
                 <TextBlock Text="{Binding Title}" Style="{StaticResource BodyStrongTextStyle}" />
@@ -32,10 +49,23 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Margin="24,20,24,12">
-            <TextBlock Text="{Binding HeaderTitle}" Style="{StaticResource TitleTextStyle}" />
-            <TextBlock Text="{DynamicResource HistoryLead}" Style="{StaticResource CaptionTextStyle}" Margin="0,4,0,0" />
-        </StackPanel>
+        <Grid Margin="24,20,24,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="0,0,16,0">
+                <TextBlock Text="{DynamicResource HistoryWindowTitle}" FontSize="20" FontWeight="SemiBold"
+                           FontFamily="Segoe UI" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="{DynamicResource HistoryLead}" Style="{StaticResource CaptionTextStyle}" Margin="0,4,0,0" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="260">
+                <TextBlock Text="{DynamicResource HistoryAccount}" Style="{StaticResource CaptionTextStyle}"
+                           FontWeight="SemiBold" Margin="0,0,0,6" />
+                <ComboBox ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}"
+                          ItemTemplate="{StaticResource HistoryAccountTemplate}" />
+            </StackPanel>
+        </Grid>
 
         <Grid Grid.Row="1" Margin="24,0,24,0">
             <Grid.ColumnDefinitions>

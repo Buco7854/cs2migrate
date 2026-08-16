@@ -38,7 +38,6 @@
     <system:String x:Key="History">History</system:String>
     <system:String x:Key="HistoryTip">Browse every archived version of the destination account and put any of them back</system:String>
     <system:String x:Key="HistoryWindowTitle">Version history</system:String>
-    <system:String x:Key="HistoryHeader">Version history — {0}</system:String>
     <system:String x:Key="HistoryLead">Every migration, backup, and restore archives the files it was about to change. Pick a point in time, then choose what to put back.</system:String>
     <system:String x:Key="HistoryEmpty">Nothing has been archived for this account yet. A version is saved automatically the first time its settings change.</system:String>
     <system:String x:Key="HistoryFilesTitle">Files in this version</system:String>
@@ -55,9 +54,14 @@
     <system:String x:Key="RestoreSelected">Restore selected files</system:String>
     <system:String x:Key="CloseButton">Close</system:String>
     <system:String x:Key="ConfirmHistoryRestoreTitle">Restore an earlier version</system:String>
-    <system:String x:Key="ConfirmHistoryRestoreMessage">Write {0} file(s) back to “{1}” as they were on {2}?&#10;&#10;The files being replaced are archived first, so this can be undone from the same window.</system:String>
+    <system:String x:Key="ConfirmHistoryRestoreMessage">Write {0} file(s) back to “{1}” from “{2}”, saved {3}?&#10;&#10;The files being replaced are archived first, so this can be undone from the same window.</system:String>
     <system:String x:Key="HistoryRestoreComplete">Earlier version restored</system:String>
     <system:String x:Key="HistoryRestoreCompleteDetail">{0} file(s) written back to {1} and verified.</system:String>
+
+    <system:String x:Key="HistoryAccount">Account</system:String>
+    <system:String x:Key="KindAppliedByMigration">Applied by a migration</system:String>
+    <system:String x:Key="SettingsChangedTitle">{0} settings file(s) changed since the last migration</system:String>
+    <system:String x:Key="SettingsChangedDetail">That is expected if you changed settings in the game. Open History if you would rather go back to an earlier version.</system:String>
 
     <system:String x:Key="AccountIdentityFallback">Steam ID · {0}</system:String>
     <system:String x:Key="NoPortableFiles">No portable CS2 settings found</system:String>
@@ -144,15 +148,6 @@
     <system:String x:Key="BackupCompleteDetail">Protected {0}: {1} settings file(s) verified.</system:String>
     <system:String x:Key="BackupStopped">Backup stopped safely</system:String>
 
-    <system:String x:Key="CloudRecoveryTitle">Steam Cloud changed {0} migrated file(s)</system:String>
-    <system:String x:Key="CloudRecoveryRunningDetail">Let Steam finish syncing, close it, then reapply the sealed local copy.</system:String>
-    <system:String x:Key="CloudRecoveryReadyDetail">The sealed copy is intact. Reapply it now so Steam recognizes it after completing its first sync.</system:String>
-    <system:String x:Key="ReapplySettings">Reapply saved settings</system:String>
-    <system:String x:Key="Reapplying">Reapplying…</system:String>
-    <system:String x:Key="RecoveryComplete">Settings reapplied</system:String>
-    <system:String x:Key="RecoveryCompleteDetail">{0} files were restored from the sealed migration copy. You can start Steam again.</system:String>
-    <system:String x:Key="ConfirmRecoveryTitle">Reapply migrated settings</system:String>
-    <system:String x:Key="ConfirmRecoveryMessage">Steam Cloud changed {0} file(s) for “{1}”. Reapply the sealed local copy?&#10;&#10;The current files will be backed up first.</system:String>
     <system:String x:Key="ConfirmMigrationTitle">Confirm migration</system:String>
     <system:String x:Key="ConfirmMigrationMessage">Copy {0} settings file(s) from “{1}” to “{2}”?&#10;&#10;Existing matching files will be backed up first. Unrelated files will not be changed.</system:String>
 

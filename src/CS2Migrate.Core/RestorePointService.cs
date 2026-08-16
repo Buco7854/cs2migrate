@@ -39,17 +39,39 @@ public sealed class RestorePointService(IProcessInspector? processInspector = nu
                 continue;
             }
 
-            var files = ReadRestorableFiles(archive.FullName, manifest, purpose);
-            if (files.Count > 0)
+            // A snapshot holds one version. A migration holds two: what the account looked
+            // like before, and what the migration put there.
+            if (purpose is MigrationPurpose.ManualBackup or MigrationPurpose.SafetyRollback)
             {
-                points.Add(new RestorePoint(archive.FullName, manifest.CreatedUtc, KindOf(purpose), files));
+                AddPoint(points, archive.FullName, manifest, KindOf(purpose), fromSnapshot: true);
+            }
+            else
+            {
+                AddPoint(points, archive.FullName, manifest, RestorePointKind.AppliedByMigration, fromSnapshot: true);
+                AddPoint(points, archive.FullName, manifest, KindOf(purpose), fromSnapshot: false);
             }
         }
 
         return points
             .OrderByDescending(point => point.CreatedUtc)
+            // Within one operation the applied version came after the version it replaced.
+            .ThenByDescending(point => point.Kind == RestorePointKind.AppliedByMigration)
             .ThenByDescending(point => point.ArchiveDirectory, StringComparer.Ordinal)
             .ToArray();
+    }
+
+    private static void AddPoint(
+        List<RestorePoint> points,
+        string archiveDirectory,
+        BackupManifest manifest,
+        RestorePointKind kind,
+        bool fromSnapshot)
+    {
+        var files = ReadRestorableFiles(archiveDirectory, manifest, fromSnapshot);
+        if (files.Count > 0)
+        {
+            points.Add(new RestorePoint(archiveDirectory, manifest.CreatedUtc, kind, files));
+        }
     }
 
     /// <summary>
@@ -122,16 +144,14 @@ public sealed class RestorePointService(IProcessInspector? processInspector = nu
     }
 
     /// <summary>
-    /// A snapshot holds the account's own files; a migration or a friend session holds the
-    /// files it was about to overwrite. Either way the archive describes how this account
-    /// looked before that operation ran.
+    /// The snapshot folder holds the version the operation wrote (or captured, for a backup);
+    /// the files folder holds the versions it overwrote.
     /// </summary>
     private static List<RestorePointFile> ReadRestorableFiles(
         string archiveDirectory,
         BackupManifest manifest,
-        MigrationPurpose purpose)
+        bool fromSnapshot)
     {
-        var fromSnapshot = purpose is MigrationPurpose.ManualBackup or MigrationPurpose.SafetyRollback;
         var directory = fromSnapshot
             ? Path.Combine(archiveDirectory, "snapshot-userdata", SteamConstants.Cs2AppId, "local", "cfg")
             : Path.Combine(archiveDirectory, "files");

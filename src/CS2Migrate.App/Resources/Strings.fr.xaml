@@ -38,7 +38,6 @@
     <system:String x:Key="History">Historique</system:String>
     <system:String x:Key="HistoryTip">Parcourir toutes les versions archivées du compte de destination et en restaurer une</system:String>
     <system:String x:Key="HistoryWindowTitle">Historique des versions</system:String>
-    <system:String x:Key="HistoryHeader">Historique des versions — {0}</system:String>
     <system:String x:Key="HistoryLead">Chaque migration, sauvegarde et restauration archive les fichiers qu’elle allait modifier. Choisissez un moment, puis ce qu’il faut restaurer.</system:String>
     <system:String x:Key="HistoryEmpty">Rien n’a encore été archivé pour ce compte. Une version est enregistrée automatiquement dès la première modification de ses réglages.</system:String>
     <system:String x:Key="HistoryFilesTitle">Fichiers de cette version</system:String>
@@ -55,9 +54,14 @@
     <system:String x:Key="RestoreSelected">Restaurer la sélection</system:String>
     <system:String x:Key="CloseButton">Fermer</system:String>
     <system:String x:Key="ConfirmHistoryRestoreTitle">Restaurer une version antérieure</system:String>
-    <system:String x:Key="ConfirmHistoryRestoreMessage">Réécrire {0} fichier(s) sur « {1} » tels qu’ils étaient le {2} ?&#10;&#10;Les fichiers remplacés sont archivés au préalable : l’opération peut être annulée depuis cette même fenêtre.</system:String>
+    <system:String x:Key="ConfirmHistoryRestoreMessage">Réécrire {0} fichier(s) sur « {1} » depuis « {2} », enregistré le {3} ?&#10;&#10;Les fichiers remplacés sont archivés au préalable : l’opération peut être annulée depuis cette même fenêtre.</system:String>
     <system:String x:Key="HistoryRestoreComplete">Version antérieure restaurée</system:String>
     <system:String x:Key="HistoryRestoreCompleteDetail">{0} fichier(s) réécrits sur {1} et vérifiés.</system:String>
+
+    <system:String x:Key="HistoryAccount">Compte</system:String>
+    <system:String x:Key="KindAppliedByMigration">Appliqué par une migration</system:String>
+    <system:String x:Key="SettingsChangedTitle">{0} fichier(s) de réglages modifiés depuis la dernière migration</system:String>
+    <system:String x:Key="SettingsChangedDetail">C’est normal si vous avez changé vos réglages en jeu. Ouvrez l’historique si vous préférez revenir à une version antérieure.</system:String>
 
     <system:String x:Key="AccountIdentityFallback">ID Steam · {0}</system:String>
     <system:String x:Key="NoPortableFiles">Aucun réglage CS2 portable trouvé</system:String>
@@ -144,15 +148,6 @@
     <system:String x:Key="BackupCompleteDetail">{0} protégé : {1} fichier(s) de réglages vérifié(s).</system:String>
     <system:String x:Key="BackupStopped">Sauvegarde arrêtée sans risque</system:String>
 
-    <system:String x:Key="CloudRecoveryTitle">Steam Cloud a modifié {0} fichier(s) migré(s)</system:String>
-    <system:String x:Key="CloudRecoveryRunningDetail">Laissez Steam terminer la synchronisation, fermez-le, puis réappliquez la copie locale scellée.</system:String>
-    <system:String x:Key="CloudRecoveryReadyDetail">La copie scellée est intacte. Réappliquez-la maintenant, après la première synchronisation de Steam.</system:String>
-    <system:String x:Key="ReapplySettings">Réappliquer les réglages</system:String>
-    <system:String x:Key="Reapplying">Réapplication…</system:String>
-    <system:String x:Key="RecoveryComplete">Réglages réappliqués</system:String>
-    <system:String x:Key="RecoveryCompleteDetail">{0} fichiers ont été restaurés depuis la copie scellée. Vous pouvez relancer Steam.</system:String>
-    <system:String x:Key="ConfirmRecoveryTitle">Réappliquer les réglages migrés</system:String>
-    <system:String x:Key="ConfirmRecoveryMessage">Steam Cloud a modifié {0} fichier(s) pour « {1} ». Réappliquer la copie locale scellée ?&#10;&#10;Les fichiers actuels seront d’abord sauvegardés.</system:String>
     <system:String x:Key="ConfirmMigrationTitle">Confirmer la migration</system:String>
     <system:String x:Key="ConfirmMigrationMessage">Copier {0} fichier(s) de réglages de « {1} » vers « {2} » ?&#10;&#10;Les fichiers correspondants seront d’abord sauvegardés. Les autres fichiers ne seront pas modifiés.</system:String>
 

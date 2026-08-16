@@ -33,7 +33,7 @@
     <system:String x:Key="OpenBackups">Dossier des sauvegardes</system:String>
     <system:String x:Key="OpenBackupsTip">Ouvrir le dossier contenant toutes les sauvegardes créées par l’application</system:String>
     <system:String x:Key="BackupTarget">Sauvegarder</system:String>
-    <system:String x:Key="BackupTargetTip">Enregistrer un instantané vérifié des réglages du compte de destination</system:String>
+    <system:String x:Key="BackupTargetTip">Enregistrer un instantané dans l’application, visible dans l’historique. Utilisez Exporter pour un fichier de votre choix.</system:String>
 
     <system:String x:Key="History">Historique</system:String>
     <system:String x:Key="HistoryTip">Parcourir toutes les versions archivées du compte de destination et en restaurer une</system:String>
@@ -45,7 +45,7 @@
     <system:String x:Key="HistoryFooter">Les fichiers remplacés sont archivés au préalable : une restauration peut donc être annulée.</system:String>
     <system:String x:Key="HistoryOneFile">1 fichier</system:String>
     <system:String x:Key="HistoryManyFiles">{0} fichiers</system:String>
-    <system:String x:Key="KindBeforeMigration">Avant une migration</system:String>
+    <system:String x:Key="KindBeforeMigration">Avant la migration</system:String>
     <system:String x:Key="KindManualBackup">Sauvegarde manuelle</system:String>
     <system:String x:Key="KindSafetyCopy">Copie de sécurité automatique</system:String>
     <system:String x:Key="KindFriendSession">Avant une session chez un ami</system:String>
@@ -59,7 +59,7 @@
     <system:String x:Key="HistoryRestoreCompleteDetail">{0} fichier(s) réécrits sur {1} et vérifiés.</system:String>
 
     <system:String x:Key="HistoryAccount">Compte</system:String>
-    <system:String x:Key="KindAppliedByMigration">Appliqué par une migration</system:String>
+    <system:String x:Key="KindAppliedByMigration">Après la migration</system:String>
     <system:String x:Key="SettingsChangedTitle">{0} fichier(s) de réglages modifiés depuis la dernière migration</system:String>
     <system:String x:Key="SettingsChangedDetail">C’est normal si vous avez changé vos réglages en jeu. Ouvrez l’historique si vous préférez revenir à une version antérieure.</system:String>
 
@@ -71,7 +71,7 @@
     <system:String x:Key="ManageTitle">Gérer un compte</system:String>
     <system:String x:Key="ManageDetail">Exportez une configuration dans un fichier, réimportez-en une, parcourez les versions précédentes ou enregistrez un instantané.</system:String>
     <system:String x:Key="Export">Exporter</system:String>
-    <system:String x:Key="ExportTip">Enregistrer les réglages de ce compte dans un fichier à conserver ou à partager</system:String>
+    <system:String x:Key="ExportTip">Écrire les réglages de ce compte dans un fichier de votre choix, à conserver ou à partager</system:String>
     <system:String x:Key="Import">Importer</system:String>
     <system:String x:Key="ImportTip">Écrire un fichier de réglages dans ce compte</system:String>
     <system:String x:Key="ExportDialogTitle">Enregistrer les réglages de ce compte</system:String>
@@ -91,6 +91,7 @@
     <system:String x:Key="BackUpThenMigrate">Sauvegarder puis migrer</system:String>
     <system:String x:Key="MigrateWithoutBackup">Migrer sans</system:String>
 
+    <system:String x:Key="PreviewTitleFor">Fichiers à écrire sur « {0} »</system:String>
     <system:String x:Key="AccountIdentityFallback">ID Steam · {0}</system:String>
     <system:String x:Key="NoPortableFiles">Aucun réglage CS2 portable trouvé</system:String>
     <system:String x:Key="OnePortableFile">1 fichier de réglages portable</system:String>

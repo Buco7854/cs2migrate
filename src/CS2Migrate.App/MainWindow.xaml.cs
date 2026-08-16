@@ -361,6 +361,11 @@ internal sealed class MainWindowViewModel : ObservableObject
     public string SafetyDetail { get => _safetyDetail; private set => SetProperty(ref _safetyDetail, value); }
     public StatusSeverity SafetySeverity { get => _safetySeverity; private set => SetProperty(ref _safetySeverity, value); }
     public string PreviewSummary { get => _previewSummary; private set => SetProperty(ref _previewSummary, value); }
+
+    /// <summary>Says where the files go, so the list is never read as belonging to something else.</summary>
+    public string PreviewHeading => SelectedTarget is null
+        ? LanguageService.Text("PreviewTitle")
+        : LanguageService.Format("PreviewTitleFor", SelectedTarget.DisplayName);
     public string PreviewSize { get => _previewSize; private set => SetProperty(ref _previewSize, value); }
     public string ActivityTitle { get => _activityTitle; private set => SetProperty(ref _activityTitle, value); }
     public string ActivityDetail { get => _activityDetail; private set => SetProperty(ref _activityDetail, value); }
@@ -902,6 +907,7 @@ internal sealed class MainWindowViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(CanMigrate));
+        OnPropertyChanged(nameof(PreviewHeading));
     }
 
     private MigrationRequest BuildRequest() => new(

@@ -33,7 +33,7 @@
     <system:String x:Key="OpenBackups">Backups folder</system:String>
     <system:String x:Key="OpenBackupsTip">Open the folder that stores every backup this app has made</system:String>
     <system:String x:Key="BackupTarget">Back up</system:String>
-    <system:String x:Key="BackupTargetTip">Save a verified snapshot of the destination account's settings</system:String>
+    <system:String x:Key="BackupTargetTip">Save a snapshot inside the app, listed under History. Use Export to write a file you choose.</system:String>
 
     <system:String x:Key="History">History</system:String>
     <system:String x:Key="HistoryTip">Browse every archived version of the destination account and put any of them back</system:String>
@@ -45,7 +45,7 @@
     <system:String x:Key="HistoryFooter">The files being replaced are archived first, so a restore can itself be undone.</system:String>
     <system:String x:Key="HistoryOneFile">1 file</system:String>
     <system:String x:Key="HistoryManyFiles">{0} files</system:String>
-    <system:String x:Key="KindBeforeMigration">Before a migration</system:String>
+    <system:String x:Key="KindBeforeMigration">Before migration</system:String>
     <system:String x:Key="KindManualBackup">Manual backup</system:String>
     <system:String x:Key="KindSafetyCopy">Automatic safety copy</system:String>
     <system:String x:Key="KindFriendSession">Before a friend session</system:String>
@@ -59,7 +59,7 @@
     <system:String x:Key="HistoryRestoreCompleteDetail">{0} file(s) written back to {1} and verified.</system:String>
 
     <system:String x:Key="HistoryAccount">Account</system:String>
-    <system:String x:Key="KindAppliedByMigration">Applied by a migration</system:String>
+    <system:String x:Key="KindAppliedByMigration">After migration</system:String>
     <system:String x:Key="SettingsChangedTitle">{0} settings file(s) changed since the last migration</system:String>
     <system:String x:Key="SettingsChangedDetail">That is expected if you changed settings in the game. Open History if you would rather go back to an earlier version.</system:String>
 
@@ -71,7 +71,7 @@
     <system:String x:Key="ManageTitle">Manage one account</system:String>
     <system:String x:Key="ManageDetail">Export a config to a file, import one back, browse earlier versions, or take a snapshot now.</system:String>
     <system:String x:Key="Export">Export</system:String>
-    <system:String x:Key="ExportTip">Save this account's settings to a single file you can keep or share</system:String>
+    <system:String x:Key="ExportTip">Write this account’s settings to a file you choose, to keep or to share</system:String>
     <system:String x:Key="Import">Import</system:String>
     <system:String x:Key="ImportTip">Write a settings file into this account</system:String>
     <system:String x:Key="ExportDialogTitle">Save the settings of this account</system:String>
@@ -91,6 +91,7 @@
     <system:String x:Key="BackUpThenMigrate">Back up, then migrate</system:String>
     <system:String x:Key="MigrateWithoutBackup">Migrate without</system:String>
 
+    <system:String x:Key="PreviewTitleFor">Files to write to “{0}”</system:String>
     <system:String x:Key="AccountIdentityFallback">Steam ID · {0}</system:String>
     <system:String x:Key="NoPortableFiles">No portable CS2 settings found</system:String>
     <system:String x:Key="OnePortableFile">1 portable settings file</system:String>

@@ -1,6 +1,10 @@
 <Window x:Class="CS2Migrate.App.HistoryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Background="{DynamicResource LayerBackgroundBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
+        FontFamily="{DynamicResource BodyFontFamily}" FontSize="14"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
         Title="{DynamicResource HistoryWindowTitle}" Width="860" Height="620"
         MinWidth="720" MinHeight="480" WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">

@@ -12,6 +12,8 @@
 
             <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
+            <!-- Implicit styles match the exact type only, so this never reached MainWindow.
+                 Each window now sets these directly; kept for any plain Window. -->
             <Style TargetType="Window">
                 <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
                 <Setter Property="FontSize" Value="14" />

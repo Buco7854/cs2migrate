@@ -3,6 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" SizeToContent="Height"
         WindowStartupLocation="CenterOwner" Width="480" Background="Transparent"
+        Foreground="{DynamicResource TextPrimaryBrush}"
+        FontFamily="{DynamicResource BodyFontFamily}" FontSize="14"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
         KeyDown="Window_KeyDown">
     <!-- Drawn rather than using a system dialog: MessageBox follows the Windows *system*
          theme, so it appears as a white box in front of a dark window. -->

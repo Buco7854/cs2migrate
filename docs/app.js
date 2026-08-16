@@ -232,8 +232,13 @@ const renderBuild = () => {
   document.querySelector("#build-size").textContent = formatBytes(buildInfo.bytes);
   document.querySelector("#checksum").textContent = buildInfo.sha256;
   currentChecksum = buildInfo.sha256;
+  // The file name never changes, so without this browsers and the CDN happily hand back the
+  // executable from an earlier build.
+  const target = buildInfo.commit
+    ? `${buildInfo.download}?v=${encodeURIComponent(buildInfo.commit)}`
+    : buildInfo.download;
   for (const link of [document.querySelector("#download-button"), document.querySelector("#download-button-bottom")]) {
-    link.href = buildInfo.download;
+    link.href = target;
   }
 };
 

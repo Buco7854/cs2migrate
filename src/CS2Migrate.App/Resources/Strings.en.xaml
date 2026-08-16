@@ -63,6 +63,11 @@
     <system:String x:Key="SettingsChangedTitle">{0} settings file(s) changed since the last migration</system:String>
     <system:String x:Key="SettingsChangedDetail">That is expected if you changed settings in the game. Open History if you would rather go back to an earlier version.</system:String>
 
+    <system:String x:Key="SwitchTheme">Switch between following Windows, light, and dark</system:String>
+    <system:String x:Key="ThemeSystem">Auto</system:String>
+    <system:String x:Key="ThemeLight">Light</system:String>
+    <system:String x:Key="ThemeDark">Dark</system:String>
+
     <system:String x:Key="AccountIdentityFallback">Steam ID · {0}</system:String>
     <system:String x:Key="NoPortableFiles">No portable CS2 settings found</system:String>
     <system:String x:Key="OnePortableFile">1 portable settings file</system:String>

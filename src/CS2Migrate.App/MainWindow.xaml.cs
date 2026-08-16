@@ -48,6 +48,8 @@ public partial class MainWindow : Window
 
     private void Language_Click(object sender, RoutedEventArgs e) => _viewModel.ChangeLanguage();
 
+    private void Theme_Click(object sender, RoutedEventArgs e) => _viewModel.ChangeTheme();
+
     private async void CloseSteam_Click(object sender, RoutedEventArgs e) => await _viewModel.CloseSteamSafelyAsync();
 
     private async void Migrate_Click(object sender, RoutedEventArgs e)
@@ -179,6 +181,13 @@ internal sealed class MainWindowViewModel : ObservableObject
     public ObservableCollection<PreviewFileViewModel> PreviewFiles { get; } = [];
     public bool IsLoaded { get; set; }
     public string LanguageButtonLabel => LanguageService.Current == AppLanguage.English ? "FR" : "EN";
+
+    public string ThemeButtonLabel => LanguageService.Text(ThemeService.Preference switch
+    {
+        ThemePreference.Light => "ThemeLight",
+        ThemePreference.Dark => "ThemeDark",
+        _ => "ThemeSystem"
+    });
     public bool HasPendingRecovery => _pendingRecovery is not null;
     public bool HasPendingTemporarySession => _pendingTemporarySession is not null;
 
@@ -304,10 +313,17 @@ internal sealed class MainWindowViewModel : ObservableObject
         "CS2Migrate",
         "steam-path.txt");
 
+    public void ChangeTheme()
+    {
+        ThemeService.Cycle();
+        OnPropertyChanged(nameof(ThemeButtonLabel));
+    }
+
     public void ChangeLanguage()
     {
         LanguageService.Toggle();
         OnPropertyChanged(nameof(LanguageButtonLabel));
+        OnPropertyChanged(nameof(ThemeButtonLabel));
         ResetLocalizedDefaults();
         Load(string.IsNullOrWhiteSpace(SteamDirectory) ? null : SteamDirectory);
     }

@@ -197,6 +197,13 @@
                         <TextBlock Text="{DynamicResource Refresh}" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
+                <Button Click="Theme_Click" ToolTip="{DynamicResource SwitchTheme}"
+                        Padding="12,5" Margin="0,0,8,0" MinWidth="86">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE706;" Style="{StaticResource CommandGlyphStyle}" />
+                        <TextBlock Text="{Binding ThemeButtonLabel}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
                 <Button Click="Language_Click" ToolTip="{DynamicResource SwitchLanguage}"
                         Padding="12,5" MinWidth="66">
                     <StackPanel Orientation="Horizontal">

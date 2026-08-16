@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -11,6 +12,13 @@ namespace CS2Migrate.App;
 /// system light/dark preference, paints with the accent colour the user picked, and asks DWM
 /// for a matching title bar.
 /// </summary>
+internal enum ThemePreference
+{
+    System,
+    Light,
+    Dark
+}
+
 internal static class ThemeService
 {
     private const string PersonalizeKey = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
@@ -30,7 +38,15 @@ internal static class ThemeService
     private static readonly Uri LightTheme = new("Resources/Theme.Light.xaml", UriKind.Relative);
     private static readonly Uri DarkTheme = new("Resources/Theme.Dark.xaml", UriKind.Relative);
 
+    private static readonly string PreferencePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "CS2Migrate",
+        "theme.txt");
+
     private static bool _isLight = true;
+
+    /// <summary>Following Windows is the default, but the choice can be overridden and is kept.</summary>
+    public static ThemePreference Preference { get; private set; } = ThemePreference.System;
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr window, int attribute, ref int value, int size);
@@ -41,6 +57,7 @@ internal static class ThemeService
 
     public static void Initialize()
     {
+        Preference = ReadPreference();
         Apply();
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
     }
@@ -73,6 +90,20 @@ internal static class ThemeService
                 ApplyTitleBar(loaded);
             }
         };
+    }
+
+    /// <summary>Steps through follow-Windows, light, and dark.</summary>
+    public static void Cycle()
+    {
+        Preference = Preference switch
+        {
+            ThemePreference.System => ThemePreference.Light,
+            ThemePreference.Light => ThemePreference.Dark,
+            _ => ThemePreference.System
+        };
+
+        WritePreference(Preference);
+        Apply();
     }
 
     public static void Apply()
@@ -175,6 +206,38 @@ internal static class ThemeService
     private static Color WithAlpha(Color color, double alpha) =>
         Color.FromArgb((byte)Math.Round(alpha * 255), color.R, color.G, color.B);
 
+    private static ThemePreference ReadPreference()
+    {
+        try
+        {
+            return File.Exists(PreferencePath)
+                ? File.ReadAllText(PreferencePath).Trim().ToLowerInvariant() switch
+                {
+                    "light" => ThemePreference.Light,
+                    "dark" => ThemePreference.Dark,
+                    _ => ThemePreference.System
+                }
+                : ThemePreference.System;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            return ThemePreference.System;
+        }
+    }
+
+    private static void WritePreference(ThemePreference preference)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(PreferencePath)!);
+            File.WriteAllText(PreferencePath, preference.ToString().ToLowerInvariant());
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // The choice still applies for this session.
+        }
+    }
+
     private static SolidColorBrush Frozen(Color color)
     {
         var brush = new SolidColorBrush(color);
@@ -184,6 +247,11 @@ internal static class ThemeService
 
     private static bool UsesLightTheme()
     {
+        if (Preference != ThemePreference.System)
+        {
+            return Preference == ThemePreference.Light;
+        }
+
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(PersonalizeKey);

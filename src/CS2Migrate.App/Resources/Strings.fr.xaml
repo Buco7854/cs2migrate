@@ -63,6 +63,11 @@
     <system:String x:Key="SettingsChangedTitle">{0} fichier(s) de réglages modifiés depuis la dernière migration</system:String>
     <system:String x:Key="SettingsChangedDetail">C’est normal si vous avez changé vos réglages en jeu. Ouvrez l’historique si vous préférez revenir à une version antérieure.</system:String>
 
+    <system:String x:Key="SwitchTheme">Basculer entre le thème de Windows, clair et sombre</system:String>
+    <system:String x:Key="ThemeSystem">Auto</system:String>
+    <system:String x:Key="ThemeLight">Clair</system:String>
+    <system:String x:Key="ThemeDark">Sombre</system:String>
+
     <system:String x:Key="AccountIdentityFallback">ID Steam · {0}</system:String>
     <system:String x:Key="NoPortableFiles">Aucun réglage CS2 portable trouvé</system:String>
     <system:String x:Key="OnePortableFile">1 fichier de réglages portable</system:String>
